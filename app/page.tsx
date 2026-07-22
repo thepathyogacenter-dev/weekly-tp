@@ -1,7 +1,7 @@
 import { ScheduleBoard } from "@/components/ScheduleBoard";
 import { getSchedule, REVALIDATE } from "@/lib/schedule";
 
-export const revalidate = REVALIDATE;
+export const revalidate = 300;
 
 export default async function Page() {
   const data = await getSchedule();
