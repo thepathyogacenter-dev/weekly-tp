@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -sI \"https://docs.google.com/spreadsheets/d/1gUiMU4XvRU6h6A4VY0ratQh18MLc0189cJ-HurTEpTg/export?format=csv&gid=0\")",
+      "Bash(curl -s \"https://docs.google.com/spreadsheets/d/1gUiMU4XvRU6h6A4VY0ratQh18MLc0189cJ-HurTEpTg/pub?output=csv\")",
+      "Bash(curl -sI \"https://docs.google.com/spreadsheets/d/1gUiMU4XvRU6h6A4VY0ratQh18MLc0189cJ-HurTEpTg/pub?output=csv\")",
+      "Bash(curl -s \"https://docs.google.com/spreadsheets/d/e/2PACX-1vTQNiTFLTvZ2btZgScdsni62jY04MPZ2djff51Ppf2khsfZO0qRpJr05Uzagreplr21xjliy2iE4tku/pub?output=csv\")",
+      "Bash(curl -sI \"https://docs.google.com/spreadsheets/d/e/2PACX-1vTQNiTFLTvZ2btZgScdsni62jY04MPZ2djff51Ppf2khsfZO0qRpJr05Uzagreplr21xjliy2iE4tku/pub?output=csv\")",
+      "Bash(curl -sL \"https://docs.google.com/spreadsheets/d/e/2PACX-1vTQNiTFLTvZ2btZgScdsni62jY04MPZ2djff51Ppf2khsfZO0qRpJr05Uzagreplr21xjliy2iE4tku/pub?output=csv\")",
+      "Bash(curl -sIL \"https://docs.google.com/spreadsheets/d/e/2PACX-1vTQNiTFLTvZ2btZgScdsni62jY04MPZ2djff51Ppf2khsfZO0qRpJr05Uzagreplr21xjliy2iE4tku/pubhtml\")",
+      "Bash(curl -s \"https://docs.google.com/spreadsheets/d/e/2PACX-1vTQNiTFLTvZ2btZgScdsni62jY04MPZ2djff51Ppf2khsfZO0qRpJr05Uzagreplr21xjliy2iE4tku/pub?gid=0&single=true&output=csv\" -o /tmp/test.csv -w \"%{http_code}\\\\n\")",
+      "Read(//tmp/**)",
+      "Bash(curl -sL -A 'Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/124.0 Safari/537.36' https://docs.google.com/spreadsheets/d/e/2PACX-1vTQNiTFLTvZ2btZgScdsni62jY04MPZ2djff51Ppf2khsfZO0qRpJr05Uzagreplr21xjliy2iE4tku/pub?output=csv -o /tmp/test2.csv -w 'http_code=%{http_code} size=%{size_download}\\\\n')",
+      "Bash(curl -s http://localhost:3000/api/schedule)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('source:', d['source']\\); print\\('classes:', len\\(d['classes']\\)\\); print\\(d['classes'][:2]\\)\")",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(npx tsc *)",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s --max-time 20 http://localhost:3000/api/schedule -o /tmp/sched.json -w \"%{http_code}\\\\n\")"
+    ]
+  }
+}

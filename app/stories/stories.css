@@ -1,0 +1,315 @@
+/* ============ IG Story templates ============ */
+:root {
+  --story-font: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* ---- Picker page chrome (uses the site's own tokens/fonts) ---- */
+.stories-shell {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 64px) clamp(18px, 4vw, 48px) 96px;
+}
+.stories-head {
+  padding-bottom: 22px;
+  border-bottom: 1.5px solid var(--ink);
+  margin-bottom: 28px;
+}
+.stories-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--rust);
+  margin: 0 0 10px;
+}
+.stories-title {
+  margin: 0;
+  font-size: clamp(32px, 6vw, 56px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+.stories-back {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.6;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.stories-back:hover { opacity: 1; }
+
+.stories-tabs { display: flex; gap: 8px; margin: 24px 0; }
+.stories-tab {
+  border: 1.5px solid var(--hair);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 3px;
+  padding: 9px 20px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.stories-tab[data-active="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+.stories-day-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 32px; }
+.stories-day-chip {
+  border: 1.5px solid var(--hair);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 3px;
+  padding: 7px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.stories-day-chip[data-active="true"] { background: var(--rust); border-color: var(--rust); color: var(--paper); }
+
+.stories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 40px;
+  align-items: start;
+}
+.stories-panel-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  margin: 0 0 12px;
+  text-align: center;
+}
+
+/* ---- Canvas: fixed 1080x1920 node, shown scaled down ---- */
+.story-canvas { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
+.story-canvas-sizer {
+  width: calc(1080px * var(--story-scale, 0.24));
+  height: calc(1920px * var(--story-scale, 0.24));
+  overflow: hidden;
+  position: relative;
+}
+.story-canvas-frame {
+  width: 1080px;
+  height: 1920px;
+  transform: scale(var(--story-scale, 0.24));
+  transform-origin: top left;
+}
+.story-download {
+  border: 1.5px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 3px;
+  padding: 10px 22px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.story-download:hover { background: var(--rust); border-color: var(--rust); }
+.story-download:disabled { opacity: 0.5; cursor: wait; }
+
+/* ---- The 1080x1920 template itself ---- */
+.story-node {
+  position: relative;
+  width: 1080px;
+  height: 1920px;
+  overflow: hidden;
+  background: #fff;
+  font-family: var(--story-font);
+  color: #fff;
+}
+/* Warm base wash — shows whenever there's no photo, sits under it otherwise */
+.story-wash {
+  position: absolute;
+  inset: 0;
+  background: rgba(161, 98, 7, 0.4); /* yellow-700/40 */
+}
+.story-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.story-tint-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(165, 108, 44, -0.6), rgba(165, 108, 44, 0.40)); /* stone-500/30 -> stone-800/30 */
+}
+.story-tint-dark {
+  position: absolute;
+  inset: 0;
+  background: rgba(23, 23, 23, 0.25); /* neutral-900/25 */
+}
+
+.story-content {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 77px;
+}
+
+.story-logo { width: 160px; height: 176px; object-fit: contain; margin-bottom: 44px; }
+
+.story-header { display: flex; flex-direction: column; align-items: center; gap: 28px; margin-bottom: 116px; }
+.story-h1 {
+  margin: 0;
+  font-size: 92px;
+  font-weight: 500;
+  letter-spacing: 4.6px;
+  text-align: center;
+  line-height: 1;
+}
+.story-date {
+  font-family: "Inter", var(--story-font);
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.story-body { flex: 1; width: 100%; display: flex; flex-direction: column; gap: 24px; min-height: 0; }
+.story-shala-heading {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.story-timeline { position: relative; display: flex; flex-direction: column; gap: 40px; }
+.story-timeline::before {
+  content: "";
+  position: absolute;
+  left: 102px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: rgba(255, 255, 255, 0.9);
+}
+.story-period-row { display: flex; align-items: flex-start; gap: 40px; }
+.story-period-label {
+  flex: 0 0 96px;
+  padding-top: 34px;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-align: left;
+}
+.story-glass-card {
+  width: 572px;;
+  flex: 1;
+  position: relative;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  border-radius: 24px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.story-entry { position: relative; display: flex; flex-direction: column; gap: 8px; }
+.story-entry::before {
+  content: "";
+  position: absolute;
+  left: -75px;
+  top: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+}
+.story-entry-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.story-entry-name { font-size: 36px; font-weight: 500; line-height: 1.15; }
+.story-entry-meta { font-size: 24px; color: rgba(255, 255, 255, 0.9); display: flex; gap: 14px; align-items: baseline; }
+/* Badge event/workshop: huruf "E"/"W" ala referensi; kalau icon PNG-nya ada, icon menimpa huruf */
+.story-tag-badge {
+  flex: 0 0 auto;
+  position: relative;
+  width: 40px;
+  height: 36px;
+  margin-top: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.story-tag-badge span {
+  font-size: 26px;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.story-tag-badge img {
+  position: absolute;
+  inset: 6px;
+  width: calc(100% - 12px);
+  height: calc(100% - 12px);
+  object-fit: contain;
+}
+
+.story-footer {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ---- Weekly variant ---- */
+.story-week-body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 26px; min-height: 0; }
+.story-week-panel {
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(14px);
+  padding: 26px 32px 14px;
+  box-shadow: 0 4px 45px rgba(0, 0, 0, 0.25);
+}
+.story-week-panel[data-alt="false"] { border-radius: 40px 10px 40px 10px; }
+.story-week-panel[data-alt="true"] { border-radius: 10px 40px 10px 40px; }
+.story-week-day-badge {
+  position: absolute;
+  top: -18px;
+  left: 32px;
+  background: #fff;
+  color: #14110c;
+  padding: 7px 22px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.story-week-panel[data-alt="true"] .story-week-day-badge { left: auto; right: 32px; }
+.story-week-rows { display: flex; flex-direction: column; }
+.story-week-row {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+.story-week-row:first-child { border-top: 1px solid rgba(255, 255, 255, 0.16); }
+.story-week-time { font-size: 17px; font-weight: 400; flex: 0 0 76px; }
+.story-week-name { font-size: 18px; font-weight: 700; flex: 1; line-height: 1.25; }
+.story-week-teacher { font-size: 15px; color: rgba(255, 255, 255, 0.6); text-align: right; flex: 0 0 auto; }
+.story-week-empty { padding: 14px 0; font-size: 16px; color: rgba(255, 255, 255, 0.55); }
