@@ -184,6 +184,7 @@ export function ScheduleBoard({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Class, teacher"
+            suppressHydrationWarning={true}
             aria-label="Search classes"
           />
           <div className="filter-meta">
