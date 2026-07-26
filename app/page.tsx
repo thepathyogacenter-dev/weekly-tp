@@ -4,7 +4,6 @@ import { datesForWeek, weekRangeLabel } from "@/lib/stories";
 import { DAYS } from "@/lib/types";
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 300; // must be a literal for Next build; mirrors REVALIDATE
 
 const TZ = "Asia/Makassar";
 
