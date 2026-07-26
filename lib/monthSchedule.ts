@@ -2,6 +2,7 @@ import { DAYS, SPACES, type ClassItem, type Day, type Space } from "./types";
 import { classTag, parseCell, timeLabelOf, toMinutes } from "./parse";
 import type { DatedClass } from "./ics";
 
+
 /**
  * Reader untuk spreadsheet "monthly calendar": tiap tab = 1 bulan, minggu ditumpuk
  * vertikal, tiap hari punya angka tanggal + 3 kolom shala (OUTDOOR/INDOOR/3rd SHALA),
@@ -10,6 +11,7 @@ import type { DatedClass } from "./ics";
  */
 
 const API = "https://sheets.googleapis.com/v4/spreadsheets";
+const res = await fetch(url, { cache: 'no-store' });
 
 interface RGB {
   red?: number;
