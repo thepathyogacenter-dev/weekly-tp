@@ -1,8 +1,8 @@
 import "../stories/stories.css";
 import { TeachersCalendar } from "@/components/TeachersCalendar";
-import { getSchedule, REVALIDATE } from "@/lib/schedule";
+import { getSchedule } from "@/lib/schedule";
 
-export const revalidate = REVALIDATE;
+export const revalidate = 300;
 
 export const metadata = {
   title: "Teacher Calendars — The Path",

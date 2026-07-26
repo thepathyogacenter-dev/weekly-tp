@@ -3,7 +3,7 @@ import { getSchedule, REVALIDATE } from "@/lib/schedule";
 import { datesForWeek, weekRangeLabel } from "@/lib/stories";
 import { DAYS } from "@/lib/types";
 
-export const revalidate = REVALIDATE;
+export const revalidate = 300; // must be a literal for Next build; mirrors REVALIDATE
 
 const TZ = "Asia/Makassar";
 

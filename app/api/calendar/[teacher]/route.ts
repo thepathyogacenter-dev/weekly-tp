@@ -2,7 +2,7 @@ import { fetchMonthlyRange } from "@/lib/monthSchedule";
 import { buildIcs, datedTeacherEvents } from "@/lib/ics";
 import { REVALIDATE } from "@/lib/schedule";
 
-export const revalidate = REVALIDATE;
+export const revalidate = 300; // literal required by Next build; mirrors REVALIDATE
 
 const TZ = "Asia/Makassar";
 const WEEKS_AHEAD = 10;
