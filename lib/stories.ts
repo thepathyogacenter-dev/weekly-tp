@@ -88,7 +88,13 @@ export function formatDateLabel(date: Date, tz: string): string {
  * put next Wednesday *after* today's Thursday).
  */
 export function datesForWeek(tz: string): Record<Day, Date> {
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: tz }));
+  const dayName = new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "long" }).format(now).toUpperCase();
   const monday = nextDate("MONDAY", tz);
+  // Jika hari ini Minggu, tarik mundur 7 hari agar Senin di minggu ini yang tampil
+  if (dayName === "SUNDAY") {
+    monday.setDate(monday.getDate() - 7);
+  }
   const out = {} as Record<Day, Date>;
   DAYS.forEach((day, i) => {
     const d = new Date(monday);
