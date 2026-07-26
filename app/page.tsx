@@ -1,10 +1,15 @@
 import { ScheduleBoard } from "@/components/ScheduleBoard";
 import { getSchedule, REVALIDATE } from "@/lib/schedule";
+import { datesForWeek, weekRangeLabel } from "@/lib/stories";
+import { DAYS } from "@/lib/types";
 
 export const revalidate = REVALIDATE;
 
+const TZ = "Asia/Makassar";
+
 export default async function Page() {
   const data = await getSchedule();
+  const weekRange = weekRangeLabel([...DAYS], datesForWeek(TZ), TZ);
 
   return (
     <main className="shell">
@@ -16,6 +21,7 @@ export default async function Page() {
             <br />
             <em>Schedule</em>
           </h1>
+          <p className="week-range">{weekRange}</p>
         </div>
         <div className="masthead-aside">
           <span>
@@ -27,6 +33,10 @@ export default async function Page() {
           <br />
           <a className="ig-stories-link" href="/stories">
             Instagram stories →
+          </a>
+          <br />
+          <a className="ig-stories-link" href="/teachers">
+            Teacher calendars →
           </a>
         </div>
       </header>

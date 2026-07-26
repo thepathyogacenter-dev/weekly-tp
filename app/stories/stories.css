@@ -90,6 +90,130 @@
   text-align: center;
 }
 
+/* ---- Teacher calendars page ---- */
+.cal-intro {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  max-width: 640px;
+  margin: 0 0 32px;
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+.cal-card {
+  display: flex;
+  flex-direction: column;
+  border: 1.5px solid var(--hair);
+  border-radius: 6px;
+  padding: 22px 22px 20px;
+  background: var(--paper);
+}
+.cal-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--hair-soft);
+}
+.cal-name {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.cal-count {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  white-space: nowrap;
+}
+.cal-list {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.cal-row {
+  display: grid;
+  grid-template-columns: 42px 118px 1fr;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 14px;
+}
+.cal-day {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+.cal-time {
+  font-family: var(--mono);
+  font-size: 12px;
+  opacity: 0.75;
+}
+.cal-class { font-weight: 500; }
+
+.cal-actions { display: flex; flex-direction: column; gap: 10px; }
+.cal-subscribe {
+  display: block;
+  text-align: center;
+  border: 1.5px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 3px;
+  padding: 11px 18px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.cal-subscribe:hover { background: var(--rust); border-color: var(--rust); }
+.cal-sublinks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.cal-linkbtn {
+  border: none;
+  background: none;
+  color: var(--ink);
+  opacity: 0.6;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font: inherit;
+  padding: 2px 0;
+}
+.cal-linkbtn:hover { opacity: 1; color: var(--rust); }
+.cal-dot { opacity: 0.35; }
+
+@media (max-width: 600px) {
+  .cal-row { grid-template-columns: 40px 104px 1fr; gap: 8px; font-size: 13px; }
+}
+
 /* ---- Canvas: fixed 1080x1920 node, shown scaled down ---- */
 .story-canvas { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
 .story-canvas-sizer {

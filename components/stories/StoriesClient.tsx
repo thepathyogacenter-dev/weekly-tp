@@ -7,7 +7,6 @@ import {
   classesForDay,
   datesForWeek,
   formatDateLabel,
-  nextDate,
   splitBySpace,
   titleCase,
   weekRangeLabel,
@@ -32,14 +31,14 @@ export function StoriesClient({ data }: { data: SchedulePayload }) {
     setDay(todayInTz());
   }, []);
 
+  const week = datesForWeek(TZ);
   const dayClasses = classesForDay(data.classes, day);
   const { outdoor, indoor } = splitBySpace(dayClasses);
-  const dateLabel = formatDateLabel(nextDate(day, TZ), TZ);
+  const dateLabel = formatDateLabel(week[day], TZ);
 
   const classesByDay: Record<Day, ClassItem[]> = Object.fromEntries(
     DAYS.map((d) => [d, classesForDay(data.classes, d)])
   ) as Record<Day, ClassItem[]>;
-  const week = datesForWeek(TZ);
 
   return (
     <main className="stories-shell">

@@ -10,7 +10,7 @@ export const MORNING_ROWS = 3;
 
 const clean = (v: unknown) => String(v ?? "").replace(/\s+/g, " ").trim();
 
-function toMinutes(raw: string, morning: boolean): number | null {
+export function toMinutes(raw: string, morning: boolean): number | null {
   const m = clean(raw).replace(",", ".").match(/^(\d{1,2})(?:[.:](\d{1,2}))?$/);
   if (!m) return null;
 
@@ -40,23 +40,30 @@ interface ParsedCell {
   needsCover: boolean;
 }
 
-/** "Sunrise Flow. Meli (7.15 - 8.15)" -> objek */
-export function parseCell(raw: string, rowIndex: number): ParsedCell | null {
+/**
+ * "Sunrise Flow. Meli (7.15 - 8.15)" -> objek.
+ * `morning` menentukan jam 7-11 dibaca pagi atau malam.
+ * `fallback` dipakai kalau sel nggak punya jam dalam kurung (mis. jam diambil dari kolom TIME SLOT).
+ */
+export function parseCell(
+  raw: string,
+  morning: boolean,
+  fallback?: { start: number | null; end: number | null }
+): ParsedCell | null {
   let text = clean(raw);
   if (!text) return null;
 
   const needsCover = /^MIA\s*[-–—]\s*/i.test(text);
   if (needsCover) text = text.replace(/^MIA\s*[-–—]\s*/i, "");
 
-  let start: number | null = null;
-  let end: number | null = null;
+  let start: number | null = fallback?.start ?? null;
+  let end: number | null = fallback?.end ?? null;
   let note = "";
 
   const paren = text.match(/\(([^()]*)\)\s*$/);
   if (paren) {
     text = text.slice(0, paren.index).trim();
     const inner = clean(paren[1]);
-    const morning = rowIndex < MORNING_ROWS;
     const parts = inner.split(/\s*[-–—]\s*/);
     const s = toMinutes(parts[0], morning);
     if (s === null) {
@@ -94,18 +101,25 @@ export function parseCell(raw: string, rowIndex: number): ParsedCell | null {
   return { name, teachers, start, end, note, needsCover };
 }
 
-/** "men's circle" selalu EVENT; sel dengan background pink di Sheet jadi WORKSHOP. */
-function tagFor(name: string, row: number, col: number, pinkCells?: Set<string>): ClassItem["tag"] {
-  if (name.toLowerCase().includes("men's circle")) return "EVENT";
-  if (pinkCells?.has(`${row},${col}`)) return "WORKSHOP";
+/** Men's/Women's Circle selalu EVENT; sel yang di-highlight warna "Workshop or event" jadi WORKSHOP. */
+export function classTag(name: string, isWorkshopColor: boolean): ClassItem["tag"] {
+  if (/\b(?:men|women)['’]s circle\b/i.test(name)) return "EVENT";
+  if (isWorkshopColor) return "WORKSHOP";
   return null;
+}
+
+/** Nama/waktu -> timeLabel "07:15 – 08:15" (atau "" kalau nggak ada jam). */
+export function timeLabelOf(start: number | null, end: number | null): string {
+  if (start === null) return "";
+  return fmtTime(start) + (end !== null ? ` – ${fmtTime(end)}` : "");
 }
 
 /**
  * Ubah matrix Sheet (kolom = hari x ruang) jadi daftar kelas.
+ * Dipakai untuk snapshot fallback lokal (tanpa warna).
  * Baris 1 = nama hari (merged), baris 2 = OUTDOOR/INDOOR/SHALA 3.
  */
-export function buildSchedule(rows: string[][], pinkCells?: Set<string>): ClassItem[] {
+export function buildSchedule(rows: string[][]): ClassItem[] {
   const dayList: string[] = [...DAYS];
   const spaceList: string[] = [...SPACES];
 
@@ -141,7 +155,7 @@ export function buildSchedule(rows: string[][], pinkCells?: Set<string>): ClassI
       const col = columns[c];
       if (!col?.day) continue;
 
-      const parsed = parseCell(rows[r][c], rowIndex);
+      const parsed = parseCell(rows[r][c], rowIndex < MORNING_ROWS);
       if (!parsed) continue;
 
       out.push({
@@ -152,13 +166,10 @@ export function buildSchedule(rows: string[][], pinkCells?: Set<string>): ClassI
         teachers: parsed.teachers,
         start: parsed.start,
         end: parsed.end,
-        timeLabel:
-          parsed.start === null
-            ? ""
-            : fmtTime(parsed.start) + (parsed.end !== null ? ` – ${fmtTime(parsed.end)}` : ""),
+        timeLabel: timeLabelOf(parsed.start, parsed.end),
         note: parsed.note,
         needsCover: parsed.needsCover,
-        tag: tagFor(parsed.name, r, c, pinkCells),
+        tag: classTag(parsed.name, false),
       });
     }
   }
