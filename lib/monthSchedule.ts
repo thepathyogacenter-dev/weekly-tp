@@ -2,7 +2,6 @@ import { DAYS, SPACES, type ClassItem, type Day, type Space } from "./types";
 import { classTag, parseCell, timeLabelOf, toMinutes } from "./parse";
 import type { DatedClass } from "./ics";
 
-
 /**
  * Reader untuk spreadsheet "monthly calendar": tiap tab = 1 bulan, minggu ditumpuk
  * vertikal, tiap hari punya angka tanggal + 3 kolom shala (OUTDOOR/INDOOR/3rd SHALA),
@@ -11,7 +10,6 @@ import type { DatedClass } from "./ics";
  */
 
 const API = "https://sheets.googleapis.com/v4/spreadsheets";
-const res = await fetch(url, { cache: 'no-store' });
 
 interface RGB {
   red?: number;
@@ -49,7 +47,7 @@ const DEFAULT_RENTAL: RGB = { red: 1, green: 1, blue: 0 };
 
 async function fetchTabTitles(apiKey: string, sheetId: string): Promise<string[]> {
   const url = `${API}/${sheetId}?key=${apiKey}&fields=sheets.properties.title`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`titles ${res.status}`);
   const json = await res.json();
   return (json.sheets ?? []).map((s: { properties: { title: string } }) => s.properties.title);
@@ -75,7 +73,7 @@ async function fetchGrid(apiKey: string, sheetId: string, title: string): Promis
   const url =
     `${API}/${sheetId}?key=${apiKey}&ranges=${range}` +
     `&fields=sheets.data.rowData.values(formattedValue,userEnteredFormat.backgroundColor)`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`grid ${title} ${res.status}`);
   const json = await res.json();
   const rowData = json.sheets?.[0]?.data?.[0]?.rowData ?? [];
