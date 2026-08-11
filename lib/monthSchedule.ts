@@ -60,8 +60,8 @@ const MONTH_TOKENS = [
 
 /** Cari nama tab yang cocok untuk bulan+tahun tertentu (mis. Jul 2026 -> "(2026) JUL"). */
 function resolveTabTitle(titles: string[], date: Date): string | null {
-  const token = MONTH_TOKENS[date.getMonth()];
-  const year = String(date.getFullYear());
+  const token = MONTH_TOKENS[date.getUTCMonth()];
+  const year = String(date.getUTCFullYear());
   const matches = titles.filter((t) => t.toUpperCase().includes(token));
   if (matches.length === 0) return null;
   // Utamakan yang menyebut tahunnya (mis. "(2026) JUL"), lalu yang tanpa tahun.
@@ -211,7 +211,7 @@ export async function fetchMonthlyWeek(
         gridCache.set(title, parseMonthGrid(grid));
       }
       const byDate = gridCache.get(title)!;
-      const dayItems = byDate.get(date.getDate()) ?? [];
+      const dayItems = byDate.get(date.getUTCDate()) ?? [];
       // Header hari di sheet dan hari target harus sama; pakai `day` target biar konsisten.
       for (const item of dayItems) out.push({ ...item, day });
     }
@@ -238,7 +238,8 @@ export async function fetchMonthlyRange(
     const out: DatedClass[] = [];
 
     for (let i = 0; i < dayCount; i++) {
-      const date = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+      const date = new Date(start);
+      date.setUTCDate(date.getUTCDate() + i);
       const title = resolveTabTitle(titles, date);
       if (!title) continue;
 
@@ -246,7 +247,7 @@ export async function fetchMonthlyRange(
         const grid = await fetchGrid(apiKey, sheetId, title);
         gridCache.set(title, parseMonthGrid(grid));
       }
-      const items = gridCache.get(title)!.get(date.getDate()) ?? [];
+      const items = gridCache.get(title)!.get(date.getUTCDate()) ?? [];
       for (const item of items) out.push({ date, item });
     }
 

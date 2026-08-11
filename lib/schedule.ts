@@ -45,13 +45,15 @@ export async function getSchedule(): Promise<SchedulePayload> {
   // Sumber utama: monthly calendar via Sheets API (butuh warna cell untuk badge workshop).
   // Minggu yang diambil = Senin–Minggu mendatang, sama dengan yang dipakai UI.
   const week = datesForWeek(TZ);
-  const classes = apiKey && sheetId ? await fetchMonthlyWeek(apiKey, sheetId, week) : null;
+  const classesPromise = apiKey && sheetId ? fetchMonthlyWeek(apiKey, sheetId, week) : Promise.resolve(null);
+  const photosPromise = teachersUrl ? fetchTeacherPhotos(teachersUrl) : Promise.resolve({});
+  const [classes, sheetPhotos] = await Promise.all([classesPromise, photosPromise]);
 
   return {
     classes: classes ?? buildSchedule(FALLBACK_ROWS),
     teacherPhotos: {
       ...TEACHER_PHOTOS,
-      ...(teachersUrl ? await fetchTeacherPhotos(teachersUrl) : {}),
+      ...sheetPhotos,
     },
     source: classes ? "sheet" : "fallback",
     fetchedAt: new Date().toISOString(),

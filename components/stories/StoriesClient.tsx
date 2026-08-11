@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { DAYS, type ClassItem, type Day, type SchedulePayload } from "@/lib/types";
+import { useState } from "react";
+import { type ClassItem, type Day, type SchedulePayload } from "@/lib/types";
 import {
-  WEEKLY_GROUPS,
   classesForDay,
   datesForWeek,
   formatDateLabel,
@@ -17,27 +16,30 @@ import { WeeklyStoryTemplate } from "./WeeklyStoryTemplate";
 
 const TZ = "Asia/Makassar";
 
-function todayInTz(): Day {
-  return new Intl.DateTimeFormat("en-GB", { timeZone: TZ, weekday: "long" })
-    .format(new Date())
-    .toUpperCase() as Day;
-}
-
-export function StoriesClient({ data }: { data: SchedulePayload }) {
+export function StoriesClient({
+  data,
+  dailyClasses,
+  dailyDay,
+  dailyDate,
+  momenceAvailable,
+}: {
+  data: SchedulePayload;
+  dailyClasses: ClassItem[];
+  dailyDay: Day;
+  dailyDate: string;
+  momenceAvailable: boolean;
+}) {
   const [tab, setTab] = useState<"daily" | "weekly">("daily");
-  const [day, setDay] = useState<Day>("MONDAY");
-
-  useEffect(() => {
-    setDay(todayInTz());
-  }, []);
 
   const week = datesForWeek(TZ);
-  const dayClasses = classesForDay(data.classes, day);
-  const { outdoor, indoor } = splitBySpace(dayClasses);
-  const dateLabel = formatDateLabel(week[day], TZ);
+  const { outdoor, indoor } = splitBySpace(dailyClasses);
+  const dateLabel = formatDateLabel(new Date(dailyDate), TZ);
 
   const classesByDay: Record<Day, ClassItem[]> = Object.fromEntries(
-    DAYS.map((d) => [d, classesForDay(data.classes, d)])
+    ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"].map((d) => [
+      d,
+      classesForDay(data.classes, d as Day),
+    ])
   ) as Record<Day, ClassItem[]>;
 
   return (
@@ -71,26 +73,20 @@ export function StoriesClient({ data }: { data: SchedulePayload }) {
 
       {tab === "daily" ? (
         <>
-          <div className="stories-day-picker">
-            {DAYS.map((d) => (
-              <button
-                key={d}
-                type="button"
-                className="stories-day-chip"
-                data-active={day === d}
-                onClick={() => setDay(d)}
-              >
-                {titleCase(d)}
-              </button>
-            ))}
-          </div>
+          <p className="stories-panel-label">Tomorrow · {titleCase(dailyDay)}</p>
+
+          {!momenceAvailable && (
+            <p className="stories-source-note" role="status">
+              Momence is temporarily unavailable. Try refreshing before downloading.
+            </p>
+          )}
 
           <div className="stories-grid">
             <div>
               <p className="stories-panel-label">Outdoor Shala</p>
-              <StoryCanvas filename={`${day.toLowerCase()}-outdoor-shala.png`} label="Outdoor Shala">
+              <StoryCanvas filename={`tomorrow-${dailyDay.toLowerCase()}-outdoor-shala.png`} label="Outdoor Shala">
                 <DailyStoryTemplate
-                  day={day}
+                  day={dailyDay}
                   dateLabel={dateLabel}
                   shalaLabel="Outdoor Shala"
                   classes={outdoor}
@@ -101,9 +97,9 @@ export function StoriesClient({ data }: { data: SchedulePayload }) {
 
             <div>
               <p className="stories-panel-label">Indoor Shala</p>
-              <StoryCanvas filename={`${day.toLowerCase()}-indoor-shala.png`} label="Indoor Shala">
+              <StoryCanvas filename={`tomorrow-${dailyDay.toLowerCase()}-indoor-shala.png`} label="Indoor Shala">
                 <DailyStoryTemplate
-                  day={day}
+                  day={dailyDay}
                   dateLabel={dateLabel}
                   shalaLabel="Indoor Shala"
                   classes={indoor}
@@ -115,15 +111,17 @@ export function StoriesClient({ data }: { data: SchedulePayload }) {
         </>
       ) : (
         <div className="stories-grid">
-          {WEEKLY_GROUPS.map((group, i) => (
-            <div key={group.title}>
-              <p className="stories-panel-label">{group.title}</p>
-              <StoryCanvas filename={`weekly-post-${i + 1}.png`} label={`Post ${i + 1}`}>
+          {([
+            { shala: "outdoor", label: "Outdoor Shala", filename: "weekly-outdoor-shala.png" },
+            { shala: "indoor", label: "Indoor Shala", filename: "weekly-indoor-shala.png" },
+          ] as const).map(({ shala, label, filename }) => (
+            <div key={shala}>
+              <p className="stories-panel-label">{label}</p>
+              <StoryCanvas filename={filename} label={label}>
                 <WeeklyStoryTemplate
-                  days={group.days}
                   classesByDay={classesByDay}
-                  dateRangeLabel={weekRangeLabel(group.days, week, TZ)}
-                  bgSrc="/stories/weekly-bg.png"
+                  dateRangeLabel={weekRangeLabel(["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"], week, TZ)}
+                  shala={shala}
                 />
               </StoryCanvas>
             </div>

@@ -26,7 +26,7 @@ function pad2(n: number): string {
   return String(n).padStart(2, "0");
 }
 function dateKey(d: Date): string {
-  return `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}`;
+  return `${d.getUTCFullYear()}${pad2(d.getUTCMonth() + 1)}${pad2(d.getUTCDate())}`;
 }
 
 function pad(n: number): string {
@@ -44,7 +44,7 @@ function fmtUtc(d: Date): string {
 /** Tanggal (kalender WITA) + menit-dari-tengah-malam -> Date absolut (UTC). */
 function witaToUtc(day: Date, minutes: number): Date {
   return new Date(
-    Date.UTC(day.getFullYear(), day.getMonth(), day.getDate(), 0, minutes - TZ_OFFSET_MIN, 0)
+    Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate(), 0, minutes - TZ_OFFSET_MIN, 0)
   );
 }
 

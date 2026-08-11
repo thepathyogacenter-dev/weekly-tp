@@ -1,6 +1,7 @@
 import { fetchMonthlyRange } from "@/lib/monthSchedule";
 import { buildIcs, datedTeacherEvents } from "@/lib/ics";
 import { REVALIDATE } from "@/lib/schedule";
+import { calendarDateInTimeZone } from "@/lib/stories";
 
 export const revalidate = 300; // literal required by Next build; mirrors REVALIDATE
 
@@ -9,8 +10,7 @@ const WEEKS_AHEAD = 10;
 
 /** Tanggal "hari ini" menurut WITA, sebagai Date yang y/m/d-nya sesuai WITA. */
 function todayInWita(): Date {
-  const now = new Date(new Date().toLocaleString("en-US", { timeZone: TZ }));
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return calendarDateInTimeZone(TZ);
 }
 
 export async function GET(_req: Request, { params }: { params: Promise<{ teacher: string }> }) {

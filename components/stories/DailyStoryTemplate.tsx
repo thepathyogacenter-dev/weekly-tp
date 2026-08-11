@@ -3,11 +3,6 @@ import { groupByPeriod, storyTimeRange, titleCase } from "@/lib/stories";
 
 const PERIOD_LABEL: Record<string, string> = { AM: "AM", NOON: "NOON", PM: "PM" };
 
-const TAG_ICON: Record<string, string> = {
-  EVENT: "/stories/icon-event.png",
-  WORKSHOP: "/stories/icon-workshop.png",
-};
-
 export function DailyStoryTemplate({
   day,
   dateLabel,
@@ -28,7 +23,7 @@ export function DailyStoryTemplate({
     <>
       <div className="story-wash" />
       <img
-        className="story-bg"
+        className={`story-bg${shalaLabel === "Outdoor Shala" ? " story-bg-outdoor" : ""}`}
         src={bgSrc}
         alt=""
         onError={(e) => {
@@ -74,17 +69,6 @@ export function DailyStoryTemplate({
                           {c.tag && (
                             <div className="story-tag-badge" title={c.tag}>
                               <span>{c.tag.charAt(0)}</span>
-                              <img
-                                src={TAG_ICON[c.tag]}
-                                alt={c.tag}
-                                onLoad={(e) => {
-                                  const letter = e.currentTarget.previousElementSibling as HTMLElement | null;
-                                  if (letter) letter.style.display = "none";
-                                }}
-                                onError={(e) => {
-                                  (e.currentTarget as HTMLImageElement).style.display = "none";
-                                }}
-                              />
                             </div>
                           )}
                         </div>

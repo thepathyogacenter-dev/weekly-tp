@@ -61,18 +61,52 @@ export function titleCase(day: string): string {
   return day.charAt(0) + day.slice(1).toLowerCase();
 }
 
-export function nextDate(day: Day, tz: string): Date {
-  const now = new Date(new Date().toLocaleString("en-US", { timeZone: tz }));
-  const todayIdx = DAYS.indexOf(
-    new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "long" })
-      .format(now)
-      .toUpperCase() as Day
-  );
+/**
+ * A date-only value whose UTC fields are the calendar date in `tz`.
+ *
+ * Schedule data has no time zone attached to its dates. Keeping these values
+ * at UTC midnight avoids accidentally changing the day when the app runs on a
+ * server outside Bali.
+ */
+export function calendarDateInTimeZone(tz: string, now = new Date()): Date {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const get = (type: string) => Number(parts.find((part) => part.type === type)?.value);
+  return new Date(Date.UTC(get("year"), get("month") - 1, get("day")));
+}
+
+/** Calendar date and weekday for tomorrow in the requested time zone. */
+export function tomorrowInTimeZone(tz: string, now = new Date()): { date: Date; day: Day } {
+  const date = calendarDateInTimeZone(tz, now);
+  date.setUTCDate(date.getUTCDate() + 1);
+  const day = new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "long" })
+    .format(new Date(date.getTime() + 12 * 60 * 60 * 1000))
+    .toUpperCase() as Day;
+  return { date, day };
+}
+
+function dayInTimeZone(tz: string, now = new Date()): Day {
+  return new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "long" })
+    .format(now)
+    .toUpperCase() as Day;
+}
+
+function addCalendarDays(date: Date, days: number): Date {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + days);
+  return next;
+}
+
+export function nextDate(day: Day, tz: string, now = new Date()): Date {
+  const today = calendarDateInTimeZone(tz, now);
+  const todayIdx = DAYS.indexOf(dayInTimeZone(tz, now));
   const targetIdx = DAYS.indexOf(day);
   const diff = (targetIdx - todayIdx + 7) % 7;
-  const d = new Date(now);
-  d.setDate(d.getDate() + diff);
-  return d;
+  return addCalendarDays(today, diff);
 }
 
 export function formatDateLabel(date: Date, tz: string): string {
@@ -87,19 +121,16 @@ export function formatDateLabel(date: Date, tz: string): string {
  * independently breaks near week boundaries (e.g. "today" being Thursday would
  * put next Wednesday *after* today's Thursday).
  */
-export function datesForWeek(tz: string): Record<Day, Date> {
-  const now = new Date(new Date().toLocaleString("en-US", { timeZone: tz }));
-  const dayName = new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "long" }).format(now).toUpperCase();
-  const monday = nextDate("MONDAY", tz);
+export function datesForWeek(tz: string, now = new Date()): Record<Day, Date> {
+  const dayName = dayInTimeZone(tz, now);
+  const monday = nextDate("MONDAY", tz, now);
   // Jika hari ini Minggu, tarik mundur 7 hari agar Senin di minggu ini yang tampil
   if (dayName === "SUNDAY") {
-    monday.setDate(monday.getDate() - 7);
+    monday.setUTCDate(monday.getUTCDate() - 7);
   }
   const out = {} as Record<Day, Date>;
   DAYS.forEach((day, i) => {
-    const d = new Date(monday);
-    d.setDate(d.getDate() + i);
-    out[day] = d;
+    out[day] = addCalendarDays(monday, i);
   });
   return out;
 }

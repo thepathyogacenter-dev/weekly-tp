@@ -268,6 +268,12 @@
   height: 100%;
   object-fit: cover;
 }
+/* The outdoor source photo includes a rug at the lower edge. Keep the crop
+   focused on the plants and shala for the 9:16 social download. */
+.story-bg-outdoor {
+  transform: scale(1.38);
+  transform-origin: center top;
+}
 .story-tint-gradient {
   position: absolute;
   inset: 0;
@@ -332,10 +338,11 @@
 .story-period-label {
   flex: 0 0 96px;
   padding-top: 34px;
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 500;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
   text-align: left;
+  white-space: nowrap;
 }
 .story-glass-card {
   width: 572px;;
@@ -363,7 +370,7 @@
 .story-entry-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .story-entry-name { font-size: 36px; font-weight: 500; line-height: 1.15; }
 .story-entry-meta { font-size: 24px; color: rgba(255, 255, 255, 0.9); display: flex; gap: 14px; align-items: baseline; }
-/* Badge event/workshop: huruf "E"/"W" ala referensi; kalau icon PNG-nya ada, icon menimpa huruf */
+/* Badge event/workshop */
 .story-tag-badge {
   flex: 0 0 auto;
   position: relative;
@@ -382,14 +389,6 @@
   text-transform: uppercase;
   line-height: 1;
 }
-.story-tag-badge img {
-  position: absolute;
-  inset: 6px;
-  width: calc(100% - 12px);
-  height: calc(100% - 12px);
-  object-fit: contain;
-}
-
 .story-footer {
   margin-top: 24px;
   text-align: center;
@@ -400,40 +399,138 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* ---- Weekly variant ---- */
-.story-week-body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 26px; min-height: 0; }
-.story-week-panel {
-  position: relative;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(14px);
-  padding: 26px 32px 14px;
-  box-shadow: 0 4px 45px rgba(0, 0, 0, 0.25);
-}
-.story-week-panel[data-alt="false"] { border-radius: 40px 10px 40px 10px; }
-.story-week-panel[data-alt="true"] { border-radius: 10px 40px 10px 40px; }
-.story-week-day-badge {
+/* ---- Weekly full-poster variant (Figma nodes 1:2160 and 1:1643) ---- */
+.weekly-poster-photo,
+.weekly-poster-overlay {
   position: absolute;
-  top: -18px;
-  left: 32px;
-  background: #fff;
-  color: #14110c;
-  padding: 7px 22px;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 3px;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.weekly-poster-photo { object-fit: cover; }
+.weekly-poster-overlay { background: rgba(26, 18, 15, 0.25); }
+.weekly-poster-panel {
+  position: absolute;
+  inset: 44px 20px 45px;
+  padding: 34px 12px;
+  border-radius: 42px;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #fcfcfc;
+  font-family: Inter, Arial, sans-serif;
+}
+.weekly-poster-title {
+  margin: 0;
+  font-size: 65px;
+  font-weight: 500;
+  letter-spacing: -1.2px;
+  line-height: 0.9;
+  text-align: center;
+  text-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.weekly-poster-range {
+  width: 389px;
+  margin: 22px 0 46px;
+  padding: 9px 11px;
+  border: 1px solid #fff;
+  border-radius: 30px;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 24px;
+  text-align: center;
   text-transform: uppercase;
 }
-.story-week-panel[data-alt="true"] .story-week-day-badge { left: auto; right: 32px; }
-.story-week-rows { display: flex; flex-direction: column; }
-.story-week-row {
-  display: flex;
-  align-items: baseline;
-  gap: 18px;
-  padding: 7px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+.weekly-poster-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 17px 27px;
+  align-content: start;
 }
-.story-week-row:first-child { border-top: 1px solid rgba(255, 255, 255, 0.16); }
-.story-week-time { font-size: 17px; font-weight: 400; flex: 0 0 76px; }
-.story-week-name { font-size: 18px; font-weight: 700; flex: 1; line-height: 1.25; }
-.story-week-teacher { font-size: 15px; color: rgba(255, 255, 255, 0.6); text-align: right; flex: 0 0 auto; }
-.story-week-empty { padding: 14px 0; font-size: 16px; color: rgba(255, 255, 255, 0.55); }
+.weekly-poster-day { position: relative; }
+.weekly-poster-day::before {
+  content: "";
+  position: absolute;
+  top: 35px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #fff;
+}
+.weekly-poster-day h2 {
+  width: max-content;
+  max-width: calc(100% - 1px);
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.25);
+  font-family: Inter, Arial, sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 23px;
+  text-transform: uppercase;
+}
+.weekly-poster-rows { display: flex; flex-direction: column; gap: 2px; margin-top: 11px; }
+.weekly-poster-row {
+  display: grid;
+  grid-template-columns: 114px auto minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 0 7px;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.88);
+}
+.weekly-poster-time {
+  min-height: 26px;
+  padding: 4px 8px 4px 0;
+  border-right: 0.5px solid rgba(255, 255, 255, 0.88);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1;
+}
+.weekly-poster-time small { margin-top: 1px; font-size: 10px; line-height: 1; }
+.weekly-poster-class { min-width: 0; display: flex; flex-direction: column; }
+.weekly-poster-class strong {
+  font-family: Inter, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+.weekly-poster-class span { margin-top: 1px; font-size: 18px; font-weight: 400; line-height: 1; text-transform: uppercase; }
+.weekly-poster-tag,
+.weekly-poster-key b {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.25);
+  font-family: Inter, Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+}
+.weekly-poster-empty { margin: 14px 0 0; font-size: 16px; opacity: 0.7; }
+.weekly-poster-footer {
+  position: absolute;
+  right: 51px;
+  bottom: 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.weekly-poster-footer img { width: 161px; height: 185px; object-fit: cover; }
+.weekly-poster-footer p { margin: 10px 0 14px; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 28px; font-weight: 500; line-height: 1; }
+.weekly-poster-key { display: flex; gap: 30px; font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 800; text-transform: uppercase; }
+.weekly-poster-key span { display: inline-flex; align-items: center; gap: 10px; }
+.weekly-poster-key b { width: 28px; height: 28px; font-size: 16px; }
