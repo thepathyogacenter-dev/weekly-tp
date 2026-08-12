@@ -344,7 +344,7 @@
 .carousel-cover-copy h1 { margin: 8px 0 30px; font-size: 96px; font-weight: 800; line-height: .87; }
 .carousel-cover-copy strong { font-size: 34px; letter-spacing: 9px; }
 .carousel-cover-copy span { margin: 56px 0 0 41px; font-family: Arial, sans-serif; font-size: 108px; font-weight: 300; line-height: .6; }
-.carousel-event-overlay { background: linear-gradient(to bottom, rgba(12,9,8,.08) 18%, rgba(24,13,11,.10) 44%, rgba(31,13,11,.66) 100%); }
+.carousel-event-overlay { background: linear-gradient(44.75deg, #433B38 0%, rgba(97, 53, 33, 0) 56.44%); }
 .carousel-event-copy { position: absolute; left: 0; right: 0; top: 500px; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 112px; }
 .carousel-type { margin: 0 0 24px; font-size: 19px; font-weight: 700; letter-spacing: 7px; }
 .carousel-event-copy h1 { max-width: 790px; margin: 0; font-size: 73px; font-weight: 800; line-height: .96; text-transform: lowercase; }
@@ -444,8 +444,8 @@
   width: 660px;
   flex: 0 0 660px;
   position: relative;
-  background: rgba(255, 255, 255, 0.20);
-  backdrop-filter: blur(12px);
+  /* Avoid backdrop-filter bleed behind the timeline dots in exported PNGs. */
+  background: rgba(69, 60, 47, 0.62);
   border-radius: 24px;
   padding: 36px 44px 48px;
   display: flex;
