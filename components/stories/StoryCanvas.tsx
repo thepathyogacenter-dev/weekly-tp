@@ -3,17 +3,18 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPngBlob, downloadPng } from "@/lib/downloadPng";
 
-const W = 1080;
-const H = 1920;
-
 export function StoryCanvas({
   filename,
   label,
   children,
+  width = 1080,
+  height = 1920,
 }: {
   filename: string;
   label: string;
   children: ReactNode;
+  width?: number;
+  height?: number;
 }) {
   const sizerRef = useRef<HTMLDivElement>(null);
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -24,7 +25,7 @@ export function StoryCanvas({
   useEffect(() => {
     const el = sizerRef.current?.parentElement;
     if (!el) return;
-    const compute = () => setScale(Math.min(el.clientWidth / W, 0.42));
+    const compute = () => setScale(Math.min(el.clientWidth / width, 0.42));
     compute();
     const ro = new ResizeObserver(compute);
     ro.observe(el);
@@ -35,7 +36,7 @@ export function StoryCanvas({
     if (!nodeRef.current) return;
     setBusy(true);
     try {
-      await downloadPng(nodeRef.current, filename, { width: W, height: H });
+      await downloadPng(nodeRef.current, filename, { width, height });
     } finally {
       setBusy(false);
     }
@@ -46,7 +47,7 @@ export function StoryCanvas({
     setBusy(true);
     setShareStatus("idle");
     try {
-      const blob = await createPngBlob(nodeRef.current, { width: W, height: H });
+      const blob = await createPngBlob(nodeRef.current, { width, height });
       const file = new File([blob], filename, { type: "image/png" });
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: label });
@@ -55,7 +56,7 @@ export function StoryCanvas({
         setShareStatus("copied");
       } else {
         setShareStatus("unavailable");
-        await downloadPng(nodeRef.current, filename, { width: W, height: H });
+        await downloadPng(nodeRef.current, filename, { width, height });
       }
     } catch (error) {
       if ((error as DOMException).name !== "AbortError") setShareStatus("unavailable");
@@ -66,9 +67,9 @@ export function StoryCanvas({
 
   return (
     <div className="story-canvas">
-      <div className="story-canvas-sizer" ref={sizerRef} style={{ "--story-scale": scale } as React.CSSProperties}>
+      <div className="story-canvas-sizer" ref={sizerRef} style={{ "--story-scale": scale, "--story-width": `${width}px`, "--story-height": `${height}px` } as React.CSSProperties}>
         <div className="story-canvas-frame" style={{ "--story-scale": scale } as React.CSSProperties}>
-          <div className="story-node" ref={nodeRef}>
+          <div className="story-node" ref={nodeRef} style={{ width, height }}>
             {children}
           </div>
         </div>

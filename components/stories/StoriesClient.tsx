@@ -17,6 +17,7 @@ import { TeacherWeeklyTemplate } from "./TeacherWeeklyTemplate";
 import { WeeklyStoryTemplate } from "./WeeklyStoryTemplate";
 import { WeeklyEventsTemplate } from "./WeeklyEventsTemplate";
 import { AdminScheduleEditor } from "./AdminScheduleEditor";
+import { CarouselCoverTemplate, CarouselEventTemplate } from "./CarouselTemplates";
 
 const TZ = "Asia/Makassar";
 
@@ -168,6 +169,23 @@ export function StoriesClient({
           )}
 
           <div className="stories-grid">
+            <div>
+              <p className="stories-panel-label">Instagram carousel · cover</p>
+              <StoryCanvas filename="weekly-workshops-events-cover.png" label="Weekly carousel cover" width={1080} height={1350}>
+                <CarouselCoverTemplate
+                  weekLabel={weekRangeLabel(["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"], week, TZ)}
+                  image={eventImages[weeklyEvents[0]?.id] ?? data.weeklyBackgroundImage ?? "/stories/weekly-schedule-photo.png"}
+                />
+              </StoryCanvas>
+            </div>
+            {weeklyEvents.map((event, index) => (
+              <div key={`carousel-${event.id}`}>
+                <p className="stories-panel-label">Instagram carousel · {index + 1}</p>
+                <StoryCanvas filename={`weekly-carousel-${index + 1}-${event.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.png`} label={event.name} width={1080} height={1350}>
+                  <CarouselEventTemplate event={event} week={week} image={eventImages[event.id] ?? "/stories/weekly-schedule-photo.png"} />
+                </StoryCanvas>
+              </div>
+            ))}
             <div>
               <p className="stories-panel-label">Outdoor Shala</p>
               <StoryCanvas filename={`tomorrow-${dailyDay.toLowerCase()}-outdoor-shala.png`} label="Outdoor Shala">
