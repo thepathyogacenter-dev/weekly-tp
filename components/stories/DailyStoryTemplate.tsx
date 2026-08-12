@@ -3,6 +3,10 @@ import { groupByPeriod, storyTimeRange, titleCase } from "@/lib/stories";
 
 const PERIOD_LABEL: Record<string, string> = { AM: "AM", NOON: "NOON", PM: "PM" };
 
+function firstNames(teachers: string[]) {
+  return teachers.map((teacher) => teacher.trim().split(/\s+/)[0]).filter(Boolean).join(", ");
+}
+
 export function DailyStoryTemplate({
   day,
   dateLabel,
@@ -81,7 +85,7 @@ export function DailyStoryTemplate({
                           {c.teachers.length > 0 && (
                             <>
                               <span>·</span>
-                              <span>{c.teachers.join(", ")}</span>
+                              <span>{firstNames(c.teachers)}</span>
                             </>
                           )}
                         </div>

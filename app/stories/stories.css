@@ -341,18 +341,18 @@
 /* The outdoor source photo includes a rug at the lower edge. Keep the crop
    focused on the plants and shala for the 9:16 social download. */
 .story-bg-outdoor {
-  transform: scale(1.38);
+  transform: scale(1.18);
   transform-origin: center top;
 }
 .story-tint-gradient {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(165, 108, 44, -0.6), rgba(165, 108, 44, 0.40)); /* stone-500/30 -> stone-800/30 */
+  background: linear-gradient(to bottom, rgba(120, 94, 58, 0.28), rgba(61, 45, 27, 0.46));
 }
 .story-tint-dark {
   position: absolute;
   inset: 0;
-  background: rgba(23, 23, 23, 0.25); /* neutral-900/25 */
+  background: rgba(23, 23, 23, 0.25);
 }
 
 .story-content {
@@ -362,12 +362,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 96px 85px 76px;
+  padding: 56px 85px 70px;
 }
 
-.story-logo { width: 160px; height: 184px; object-fit: contain; margin-bottom: 32px; }
+.story-logo { width: 160px; height: 184px; object-fit: contain; margin-bottom: 15px; }
 
-.story-header { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 56px; }
+.story-header { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 78px; }
 .story-h1 {
   margin: 0;
   font-size: 96px;
@@ -419,7 +419,7 @@
   width: 660px;
   flex: 0 0 660px;
   position: relative;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.20);
   backdrop-filter: blur(12px);
   border-radius: 24px;
   padding: 36px 44px 48px;
