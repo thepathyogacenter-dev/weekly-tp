@@ -369,7 +369,7 @@
   padding: 56px 85px 70px;
 }
 
-.story-logo { width: 160px; height: 184px; object-fit: contain; margin-bottom: 15px; }
+.story-logo { width: 160px; height: 184px; object-fit: contain; margin-bottom: 30px; }
 
 .story-header { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 78px; }
 .story-h1 {
@@ -483,7 +483,8 @@
   width: 100%;
   height: 100%;
 }
-.weekly-poster-photo { object-fit: cover; }
+.weekly-poster-photo { object-fit: cover; filter: blur(15px); transform: scale(1.16); }
+.weekly-poster-photo-focus { filter: none; transform: scale(1.05); opacity: .62; }
 .weekly-poster-overlay { background: rgba(26, 18, 15, 0.25); }
 .weekly-poster-panel {
   position: absolute;
@@ -606,7 +607,7 @@
   flex-direction: column;
   align-items: flex-end;
 }
-.weekly-poster-footer img { width: 161px; height: 185px; object-fit: cover; }
+.weekly-poster-footer img { width: 161px; height: 185px; object-fit: contain; }
 .weekly-poster-footer p { margin: 10px 0 14px; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 28px; font-weight: 500; line-height: 1; }
 .weekly-poster-key { display: flex; gap: 30px; font-family: var(--story-font); font-size: 16px; font-weight: 800; text-transform: uppercase; }
 .weekly-poster-key span { display: inline-flex; align-items: center; gap: 10px; }
@@ -627,23 +628,26 @@
 .weekly-events-poster { position: relative; width: 100%; height: 100%; overflow: hidden; padding: 96px 48px 70px; box-sizing: border-box; color: #fff; font-family: var(--story-font); }
 .weekly-events-background, .weekly-events-overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
 .weekly-events-background { object-fit: cover; }
-.weekly-events-overlay { background: rgba(18, 24, 18, .58); backdrop-filter: blur(4px); }
+.weekly-events-overlay { background: rgba(20, 24, 18, .52); backdrop-filter: blur(3px); }
 .weekly-events-header, .weekly-events-grid, .weekly-events-empty { position: relative; z-index: 1; }
-.weekly-events-header { display: grid; grid-template-columns: 165px 1fr; align-items: center; gap: 28px; margin-bottom: 58px; }
-.weekly-events-header img { width: 148px; height: 170px; object-fit: contain; }
-.weekly-events-header h1 { margin: 0; font-size: 59px; line-height: .95; letter-spacing: -1px; }
-.weekly-events-header p { width: max-content; margin: 20px 0 0; padding: 10px 28px; border: 1px solid rgba(255,255,255,.75); border-radius: 99px; font-size: 17px; font-weight: 700; letter-spacing: 5px; }
-.weekly-events-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 20px; align-content: start; }
-.weekly-event-date { min-height: 40px; margin: 0 0 12px; font-size: 15px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; }
-.weekly-event-card-surface { min-height: 488px; padding: 24px; box-sizing: border-box; border: 1px solid rgba(255,255,255,.3); border-radius: 25px; background: rgba(40, 40, 38, .6); backdrop-filter: blur(12px); }
+.weekly-events-header { display: grid; grid-template-columns: 161px 1fr; align-items: center; gap: 28px; margin-bottom: 58px; }
+.weekly-events-header img { width: 161px; height: 185px; object-fit: contain; }
+.weekly-events-header > div { display: flex; flex-direction: column; align-items: center; }
+.weekly-events-header h1 { margin: 0; font-size: 60px; font-weight: 700; line-height: 1.05; letter-spacing: -.9px; text-align: center; }
+.weekly-events-header p { width: max-content; margin: 18px 0 0; padding: 12px 24px; border: 1px solid rgba(255,255,255,.5); border-radius: 99px; background: rgba(255,255,255,.1); backdrop-filter: blur(12px); font-size: 16px; font-weight: 500; letter-spacing: 6px; }
+.weekly-events-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 20px; align-content: start; }
+.weekly-event-date { min-height: 61px; display: flex; flex-direction: column; gap: 8px; margin: 0 0 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,.15); text-transform: uppercase; }
+.weekly-event-date span { color: rgba(255,255,255,.5); font-size: 14px; font-weight: 700; letter-spacing: 6px; }
+.weekly-event-date strong { font-size: 20px; line-height: 1; }
+.weekly-event-card-surface { min-height: 536px; padding: 24px; box-sizing: border-box; border: 1px solid rgba(255,255,255,.2); border-radius: 24px; background: rgba(255,255,255,.10); backdrop-filter: blur(12px); }
 .weekly-event-card-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 16px; }
-.weekly-event-card-meta span:first-child { padding: 8px 13px; border-radius: 99px; background: rgba(255,255,255,.16); font-size: 11px; font-weight: 800; letter-spacing: 4px; }
-.weekly-event-card-meta span:last-child { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; text-transform: uppercase; }
-.weekly-event-card-surface img { width: 100%; height: 250px; border-radius: 15px; object-fit: cover; }
+.weekly-event-card-meta span:first-child { padding: 8px 13px; border-radius: 99px; background: rgba(255,255,255,.1); font-size: 11px; font-weight: 500; letter-spacing: 4px; }
+.weekly-event-card-meta span:last-child { overflow: hidden; font-size: 19px; font-weight: 400; text-overflow: ellipsis; white-space: nowrap; text-transform: uppercase; }
+.weekly-event-card-surface img { width: 100%; height: 320px; border-radius: 16px; object-fit: cover; }
 .weekly-event-card-time { display: flex; justify-content: space-between; align-items: baseline; margin-top: 18px; }
-.weekly-event-card-time strong { font-size: 17px; }
-.weekly-event-card-time span { font-size: 13px; opacity: .78; }
-.weekly-event-card-surface h2 { margin: 12px 0 0; font-size: 20px; line-height: 1.13; text-transform: uppercase; }
+.weekly-event-card-time strong { font-size: 18px; }
+.weekly-event-card-time span { font-size: 14px; opacity: .7; }
+.weekly-event-card-surface h2 { margin: 12px 0 0; font-size: 20px; font-weight: 800; line-height: 1.13; text-transform: uppercase; }
 .weekly-events-empty { margin: 80px 0 0; font-size: 22px; text-align: center; }
 
 /* ---- Weekly teacher WhatsApp bulletin ---- */

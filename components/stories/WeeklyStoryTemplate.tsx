@@ -44,6 +44,11 @@ export function WeeklyStoryTemplate({
         src={backgroundImageUrl ?? "/stories/weekly-schedule-photo.png"}
         alt=""
       />
+      <img
+        className="weekly-poster-photo weekly-poster-photo-focus"
+        src={backgroundImageUrl ?? "/stories/weekly-schedule-photo.png"}
+        alt=""
+      />
       <div className="weekly-poster-overlay" />
 
       <section className="weekly-poster-panel">
