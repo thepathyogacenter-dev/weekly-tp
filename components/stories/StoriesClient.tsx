@@ -34,7 +34,7 @@ export function StoriesClient({
   dailyDate: string;
   momenceAvailable: boolean;
 }) {
-  const [tab, setTab] = useState<"daily" | "weekly" | "schedule">("daily");
+  const [tab, setTab] = useState<"daily" | "weekly" | "carousel" | "schedule">("daily");
   const [adminClasses, setAdminClasses] = useState<ClassItem[]>(data.classes);
   const [scheduleLoaded, setScheduleLoaded] = useState(false);
 
@@ -149,6 +149,14 @@ export function StoriesClient({
         <button
           type="button"
           className="stories-tab"
+          data-active={tab === "carousel"}
+          onClick={() => setTab("carousel")}
+        >
+          Weekly posts carousel
+        </button>
+        <button
+          type="button"
+          className="stories-tab"
           data-active={tab === "schedule"}
           onClick={() => setTab("schedule")}
         >
@@ -158,6 +166,35 @@ export function StoriesClient({
 
       {tab === "schedule" ? (
         <AdminScheduleEditor classes={adminClasses} onChange={setAdminClasses} onReset={resetAdminClasses} />
+      ) : tab === "carousel" ? (
+        <>
+          <section className="weekly-events-admin" aria-labelledby="carousel-admin-title">
+            <div>
+              <p className="stories-panel-label">Weekly Instagram posts</p>
+              <h2 id="carousel-admin-title">Workshops & events carousel</h2>
+              <p>Download the cover first, then the individual event and workshop posts in order.</p>
+            </div>
+          </section>
+          <div className="stories-grid">
+            <div>
+              <p className="stories-panel-label">Cover</p>
+              <StoryCanvas filename="weekly-workshops-events-cover.png" label="Weekly posts carousel cover" width={1080} height={1350}>
+                <CarouselCoverTemplate
+                  weekLabel={weekRangeLabel(["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"], week, TZ)}
+                  image={eventImages[weeklyEvents[0]?.id] ?? data.weeklyBackgroundImage ?? "/stories/weekly-schedule-photo.png"}
+                />
+              </StoryCanvas>
+            </div>
+            {weeklyEvents.map((event, index) => (
+              <div key={`carousel-${event.id}`}>
+                <p className="stories-panel-label">Post {index + 1}</p>
+                <StoryCanvas filename={`weekly-carousel-${index + 1}-${event.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.png`} label={event.name} width={1080} height={1350}>
+                  <CarouselEventTemplate event={event} week={week} image={eventImages[event.id] ?? "/stories/weekly-schedule-photo.png"} />
+                </StoryCanvas>
+              </div>
+            ))}
+          </div>
+        </>
       ) : tab === "daily" ? (
         <>
           <p className="stories-panel-label">Tomorrow · {titleCase(dailyDay)}</p>
@@ -169,23 +206,6 @@ export function StoriesClient({
           )}
 
           <div className="stories-grid">
-            <div>
-              <p className="stories-panel-label">Weekly posts carousel · cover</p>
-              <StoryCanvas filename="weekly-workshops-events-cover.png" label="Weekly posts carousel cover" width={1080} height={1350}>
-                <CarouselCoverTemplate
-                  weekLabel={weekRangeLabel(["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"], week, TZ)}
-                  image={eventImages[weeklyEvents[0]?.id] ?? data.weeklyBackgroundImage ?? "/stories/weekly-schedule-photo.png"}
-                />
-              </StoryCanvas>
-            </div>
-            {weeklyEvents.map((event, index) => (
-              <div key={`carousel-${event.id}`}>
-                <p className="stories-panel-label">Weekly posts carousel · {index + 1}</p>
-                <StoryCanvas filename={`weekly-carousel-${index + 1}-${event.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.png`} label={event.name} width={1080} height={1350}>
-                  <CarouselEventTemplate event={event} week={week} image={eventImages[event.id] ?? "/stories/weekly-schedule-photo.png"} />
-                </StoryCanvas>
-              </div>
-            ))}
             <div>
               <p className="stories-panel-label">Outdoor Shala</p>
               <StoryCanvas filename={`tomorrow-${dailyDay.toLowerCase()}-outdoor-shala.png`} label="Outdoor Shala">
