@@ -444,8 +444,9 @@
   width: 660px;
   flex: 0 0 660px;
   position: relative;
-  /* Avoid backdrop-filter bleed behind the timeline dots in exported PNGs. */
-  background: rgba(69, 60, 47, 0.62);
+  /* Light frosted glass without backdrop-filter bleed behind timeline dots. */
+  background: rgba(255, 255, 255, 0.30);
+  border: 1px solid rgba(255, 255, 255, 0.20);
   border-radius: 24px;
   padding: 36px 44px 48px;
   display: flex;

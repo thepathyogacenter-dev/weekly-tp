@@ -120,16 +120,14 @@ export function formatDateLabel(date: Date, tz: string): string {
 }
 
 /**
- * Dates for the upcoming (or current) Monday-Sunday week, anchored to a single
- * Monday so the 7 dates are always consecutive — calling nextDate() per day
- * independently breaks near week boundaries (e.g. "today" being Thursday would
- * put next Wednesday *after* today's Thursday).
+ * Dates for the current Monday-Sunday week, except from Friday onward when the
+ * upcoming week is prepared for the studio's weekly publishing workflow.
  */
 export function datesForWeek(tz: string, now = new Date()): Record<Day, Date> {
   const today = calendarDateInTimeZone(tz, now);
   const dayIndex = DAYS.indexOf(dayInTimeZone(tz, now));
-  // Anchor to this week's Monday, never the following Monday.
-  const monday = addCalendarDays(today, -dayIndex);
+  const isFridayOrLater = dayIndex >= DAYS.indexOf("FRIDAY");
+  const monday = addCalendarDays(today, -dayIndex + (isFridayOrLater ? 7 : 0));
   const out = {} as Record<Day, Date>;
   DAYS.forEach((day, i) => {
     out[day] = addCalendarDays(monday, i);
