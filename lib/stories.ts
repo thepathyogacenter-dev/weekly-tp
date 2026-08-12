@@ -44,9 +44,13 @@ export function classesForDay(classes: ClassItem[], day: Day): ClassItem[] {
     .sort((a, b) => (a.start ?? 1e6) - (b.start ?? 1e6));
 }
 
-/** "07:15" -> "7:15" (drop the leading zero, keep 24h since that's what the Sheet gives us). */
+/** "13:30" -> "1:30" for the compact 12-hour Daily story time labels. */
 export function shortTime(hhmm: string): string {
-  return hhmm.replace(/^0/, "");
+  const match = hhmm.trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return hhmm;
+  const hours = Number(match[1]);
+  const minutes = match[2];
+  return `${hours % 12 || 12}:${minutes}`;
 }
 
 export function storyTimeRange(c: ClassItem): string {

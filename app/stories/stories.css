@@ -298,7 +298,9 @@
   transform: scale(var(--story-scale, 0.24));
   transform-origin: top left;
 }
-.story-download {
+.story-actions { display: flex; align-items: stretch; justify-content: center; gap: 8px; }
+.story-download,
+.story-share {
   border: 1.5px solid var(--ink);
   background: var(--ink);
   color: var(--paper);
@@ -312,8 +314,10 @@
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
-.story-download:hover { background: var(--rust); border-color: var(--rust); }
-.story-download:disabled { opacity: 0.5; cursor: wait; }
+.story-share { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 14px; }
+.story-share span:first-child { font-family: Arial, sans-serif; font-size: 16px; line-height: .65; }
+.story-download:hover, .story-share:hover { background: var(--rust); border-color: var(--rust); }
+.story-download:disabled, .story-share:disabled { opacity: 0.5; cursor: wait; }
 
 /* ---- The 1080x1920 template itself ---- */
 .story-node {
@@ -399,13 +403,13 @@
 .story-timeline::before {
   content: "";
   position: absolute;
-  left: 96px;
+  left: 120px;
   top: 0;
   bottom: 0;
   width: 3px;
   background: rgba(255, 255, 255, 0.9);
 }
-.story-period-row { display: flex; align-items: flex-start; gap: 30px; }
+.story-period-row { display: flex; align-items: flex-start; gap: 56px; }
 .story-period-label {
   flex: 0 0 96px;
   padding-top: 30px;

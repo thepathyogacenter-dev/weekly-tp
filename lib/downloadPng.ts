@@ -1,13 +1,7 @@
 import { toPng } from "html-to-image";
 
-/**
- * The node is displayed shrunk down (CSS transform: scale(...)) for on-page
- * preview, but must export at its true intrinsic size — so the capture
- * clone gets its transform reset to identity via html-to-image's `style` override.
- */
-export async function downloadPng(
+export async function createPngBlob(
   node: HTMLElement,
-  filename: string,
   size: { width: number; height: number }
 ) {
   const dataUrl = await toPng(node, {
@@ -21,9 +15,23 @@ export async function downloadPng(
       height: `${size.height}px`,
     },
   });
+  return await (await fetch(dataUrl)).blob();
+}
 
+/**
+ * The node is displayed shrunk down (CSS transform: scale(...)) for on-page
+ * preview, but must export at its true intrinsic size — so the capture
+ * clone gets its transform reset to identity via html-to-image's `style` override.
+ */
+export async function downloadPng(
+  node: HTMLElement,
+  filename: string,
+  size: { width: number; height: number }
+) {
+  const blob = await createPngBlob(node, size);
   const link = document.createElement("a");
   link.download = filename;
-  link.href = dataUrl;
+  link.href = URL.createObjectURL(blob);
   link.click();
+  URL.revokeObjectURL(link.href);
 }
