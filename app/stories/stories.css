@@ -700,7 +700,7 @@
   color: #fff;
   text-transform: uppercase;
 }
-.teacher-weekly-title-block span { font-size: 30px; font-weight: 800; line-height: 1.05; }
+.teacher-weekly-title-block span { font-size: 40px; font-weight: 800; line-height: 1.05; }
 .teacher-weekly-title-block strong { margin-top: 8px; font-size: 27px; line-height: 1; }
 .teacher-weekly-meta { display: flex; flex-direction: column; align-items: flex-end; padding-top: 6px; }
 .teacher-weekly-meta > strong { font-size: 25px; line-height: 1; }
@@ -720,7 +720,7 @@
   font-weight: 800;
   line-height: 1;
 }
-.teacher-weekly-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 58px; }
+.teacher-weekly-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 25px; }
 .teacher-weekly-column { display: flex; flex-direction: column; gap: 30px; min-width: 0; }
 .teacher-weekly-day h2 {
   display: inline-block;
@@ -740,12 +740,12 @@
   padding: 6px 9px;
   border-radius: 7px;
   background: rgba(255,255,255,.92);
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.05;
   text-align: center;
   white-space: nowrap;
 }
-.teacher-weekly-row p { margin: 5px 0 0; font-size: 16px; line-height: 1.08; text-transform: uppercase; }
+.teacher-weekly-row p { margin: 5px 0 0; font-size: 18px; line-height: 1.08; text-transform: uppercase; }
 .teacher-weekly-row p strong { font-weight: 850; }
 .teacher-weekly-row p span { font-weight: 500; }
 .teacher-weekly-tag { width: 29px; height: 29px; margin-top: 1px; font-size: 16px; }
