@@ -50,7 +50,13 @@ export function DailyStoryTemplate({
         </div>
 
         <div className="story-body">
-          <div className="story-shala-heading">{shalaLabel}</div>
+          <div className="story-shala-heading-row">
+            <div className="story-shala-heading">{shalaLabel}</div>
+            <div className="story-badge-key" aria-label="Schedule legend">
+              <span><b>E</b> Event</span>
+              <span><b>W</b> Workshop</span>
+            </div>
+          </div>
 
           {entries.length === 0 ? (
             <div className="story-glass-card">
@@ -63,15 +69,17 @@ export function DailyStoryTemplate({
                   <div className="story-period-label">{PERIOD_LABEL[period]}</div>
                   <div className="story-glass-card">
                     {periods[period].map((c) => (
-                      <div className="story-entry" key={c.id}>
-                        <div className="story-entry-top">
-                          <div className="story-entry-name">{c.name}</div>
-                          {c.tag && (
-                            <div className="story-tag-badge" title={c.tag}>
-                              <span>{c.tag.charAt(0)}</span>
+                        <div className="story-entry" key={c.id}>
+                          <div className="story-entry-top">
+                            <div className="story-entry-title-line">
+                              <div className="story-entry-name">{c.name}</div>
+                              {c.tag && (
+                                <div className="story-tag-badge" title={c.tag}>
+                                  <span>{c.tag === "EVENT" ? "E" : "W"}</span>
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
+                          </div>
                         <div className="story-entry-meta">
                           {storyTimeRange(c) && <span>[ {storyTimeRange(c)} ]</span>}
                           {c.teachers.length > 0 && (

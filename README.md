@@ -37,6 +37,31 @@ e.g. a Webflow asset), publish as CSV, set `TEACHERS_CSV_URL`.
 
 No photo → circle with the teacher's initials.
 
+## Weekly bulletin background image
+
+Add a tab named **Weekly Images** to the same Google Sheet. Use these exact headers in row 1:
+
+| Week Start | Background Image URL |
+|---|---|
+| `2026-08-10` | `https://your-image-host.com/the-path-weekly-10-aug.jpg` |
+
+Add one row per Monday. The weekly social download automatically uses the matching image
+for that Monday–Sunday schedule. Use a public direct image URL (JPG, PNG, or WebP) that
+allows cross-origin loading; if there is no matching row, it uses the existing Path image.
+
+## Admin access
+
+The `/stories` admin dashboard is password-protected. Add these values to `.env.local` before
+using it in production:
+
+```bash
+ADMIN_PASSWORD=your-strong-admin-password
+ADMIN_SESSION_SECRET=your-long-random-session-secret
+```
+
+Keep both values private. The `/teachers` portal remains accessible to teachers without the
+admin password.
+
 ## Embed in Webflow
 
 Deploy, then drop an Embed element on the page:

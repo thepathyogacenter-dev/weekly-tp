@@ -10,6 +10,7 @@ import type { DatedClass } from "./ics";
  */
 
 const API = "https://sheets.googleapis.com/v4/spreadsheets";
+const WEEKLY_IMAGES_TAB = "WEEKLY IMAGES";
 
 interface RGB {
   red?: number;
@@ -84,6 +85,39 @@ async function fetchGrid(apiKey: string, sheetId: string, title: string): Promis
         color: v.userEnteredFormat?.backgroundColor ?? null,
       }))
   );
+}
+
+/**
+ * Reads the optional `Weekly Images` tab. It has two columns:
+ * `Week Start` (an ISO Monday date, e.g. 2026-08-10) and
+ * `Background Image URL` (a public, CORS-enabled image URL).
+ */
+export async function fetchWeeklyBackgroundImage(
+  apiKey: string,
+  sheetId: string,
+  weekStart: Date
+): Promise<string | null> {
+  try {
+    const titles = await fetchTabTitles(apiKey, sheetId);
+    const tab = titles.find((title) => title.trim().toUpperCase() === WEEKLY_IMAGES_TAB);
+    if (!tab) return null;
+
+    const grid = await fetchGrid(apiKey, sheetId, tab);
+    const headers = (grid[0] ?? []).map((cell) => cell.text.trim().toLowerCase());
+    const weekStartColumn = headers.indexOf("week start");
+    const imageColumn = headers.indexOf("background image url");
+    if (weekStartColumn === -1 || imageColumn === -1) return null;
+
+    const key = weekStart.toISOString().slice(0, 10);
+    for (const row of grid.slice(1)) {
+      if (cellAt([row], 0, weekStartColumn).text.trim() !== key) continue;
+      const imageUrl = cellAt([row], 0, imageColumn).text.trim();
+      return /^https?:\/\//i.test(imageUrl) ? imageUrl : null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 function cellAt(grid: Grid, r: number, c: number): Cell {

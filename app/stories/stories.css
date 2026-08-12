@@ -41,6 +41,31 @@
   text-underline-offset: 3px;
 }
 .stories-back:hover { opacity: 1; }
+.stories-head-actions { display: flex; align-items: center; gap: 16px; }
+.admin-logout {
+  border: 1px solid var(--hair);
+  border-radius: 3px;
+  padding: 5px 9px;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.admin-logout:hover { border-color: var(--ink); }
+.admin-login-shell { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: var(--paper); }
+.admin-login-card { width: min(100%, 420px); padding: 36px; border: 1.5px solid var(--hair); border-radius: 6px; background: var(--paper); }
+.admin-login-card h1 { margin: 0; font-size: 38px; line-height: 1; text-transform: uppercase; }
+.admin-login-card > p:not(.stories-eyebrow) { margin: 14px 0 28px; line-height: 1.45; }
+.admin-login-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+.admin-login-form label { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.admin-login-form input { min-height: 42px; padding: 0 12px; border: 1.5px solid var(--hair); border-radius: 3px; background: #fff; color: var(--ink); font: inherit; }
+.admin-login-form button { min-height: 42px; border: 1.5px solid var(--ink); border-radius: 3px; background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
+.admin-login-form button:disabled { opacity: .55; cursor: wait; }
+.admin-login-error { margin: 0; color: #a72e1f; font-size: 13px; }
 
 .stories-tabs { display: flex; gap: 8px; margin: 24px 0; }
 .stories-tab {
@@ -101,6 +126,8 @@
   max-width: 640px;
   margin: 0 0 32px;
 }
+.teacher-calendar-section { margin-top: 72px; padding-top: 42px; border-top: 1.5px solid var(--ink); }
+.teacher-calendar-title { margin: 0 0 20px; font-size: 32px; line-height: 1; text-transform: uppercase; }
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -323,6 +350,10 @@
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.92);
 }
+.story-shala-heading-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.story-badge-key { display: flex; align-items: center; gap: 16px; font-family: Inter, var(--story-font); font-size: 15px; font-weight: 700; text-transform: uppercase; }
+.story-badge-key span { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.story-badge-key b { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 4px; background: rgba(255,255,255,.3); font-size: 16px; }
 
 .story-timeline { position: relative; display: flex; flex-direction: column; gap: 40px; }
 .story-timeline::before {
@@ -367,16 +398,16 @@
   border-radius: 50%;
   background: #fff;
 }
-.story-entry-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.story-entry-top { display: block; }
+.story-entry-title-line { display: flex; align-items: flex-start; gap: 12px; }
 .story-entry-name { font-size: 36px; font-weight: 500; line-height: 1.15; }
 .story-entry-meta { font-size: 24px; color: rgba(255, 255, 255, 0.9); display: flex; gap: 14px; align-items: baseline; }
 /* Badge event/workshop */
 .story-tag-badge {
   flex: 0 0 auto;
-  position: relative;
-  width: 40px;
-  height: 36px;
-  margin-top: 4px;
+  width: 30px;
+  height: 30px;
+  margin-top: 5px;
   background: rgba(255, 255, 255, 0.3);
   border-radius: 4px;
   display: flex;
@@ -384,7 +415,7 @@
   justify-content: center;
 }
 .story-tag-badge span {
-  font-size: 26px;
+  font-size: 18px;
   font-weight: 700;
   text-transform: uppercase;
   line-height: 1;
@@ -449,9 +480,10 @@
   width: 100%;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 17px 27px;
+  gap: 27px;
   align-content: start;
 }
+.weekly-poster-column { display: flex; flex-direction: column; gap: 17px; min-width: 0; }
 .weekly-poster-day { position: relative; }
 .weekly-poster-day::before {
   content: "";
@@ -534,3 +566,146 @@
 .weekly-poster-key { display: flex; gap: 30px; font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 800; text-transform: uppercase; }
 .weekly-poster-key span { display: inline-flex; align-items: center; gap: 10px; }
 .weekly-poster-key b { width: 28px; height: 28px; font-size: 16px; }
+
+/* ---- Weekly events and workshops story ---- */
+.weekly-events-admin { margin: 0 0 42px; padding: 24px; border: 1.5px solid var(--hair); border-radius: 6px; background: var(--paper); }
+.weekly-events-admin > div:first-child { margin-bottom: 20px; }
+.weekly-events-admin .stories-panel-label { text-align: left; margin-bottom: 7px; }
+.weekly-events-admin h2 { margin: 0; font-size: 30px; line-height: 1; text-transform: uppercase; }
+.weekly-events-admin p:not(.stories-panel-label) { margin: 10px 0 0; font-size: 15px; }
+.weekly-events-upload-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+.weekly-events-upload { display: grid; grid-template-columns: 28px 1fr; gap: 8px 10px; align-items: center; padding: 12px; border: 1px solid var(--hair); border-radius: 4px; cursor: pointer; }
+.weekly-events-upload > span { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 4px; background: var(--rust); color: var(--paper); font-family: var(--mono); font-size: 12px; font-weight: 700; }
+.weekly-events-upload strong { font-size: 13px; line-height: 1.2; text-transform: uppercase; }
+.weekly-events-upload input { grid-column: 1 / -1; width: 100%; font-size: 12px; }
+.weekly-events-upload em { grid-column: 1 / -1; color: var(--rust); font-family: var(--mono); font-size: 10px; font-style: normal; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.weekly-events-poster { position: relative; width: 100%; height: 100%; overflow: hidden; padding: 96px 48px 70px; box-sizing: border-box; color: #fff; font-family: Inter, Arial, sans-serif; }
+.weekly-events-background, .weekly-events-overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
+.weekly-events-background { object-fit: cover; }
+.weekly-events-overlay { background: rgba(18, 24, 18, .58); backdrop-filter: blur(4px); }
+.weekly-events-header, .weekly-events-grid, .weekly-events-empty { position: relative; z-index: 1; }
+.weekly-events-header { display: grid; grid-template-columns: 165px 1fr; align-items: center; gap: 28px; margin-bottom: 58px; }
+.weekly-events-header img { width: 148px; height: 170px; object-fit: contain; }
+.weekly-events-header h1 { margin: 0; font-size: 59px; line-height: .95; letter-spacing: -1px; }
+.weekly-events-header p { width: max-content; margin: 20px 0 0; padding: 10px 28px; border: 1px solid rgba(255,255,255,.75); border-radius: 99px; font-size: 17px; font-weight: 700; letter-spacing: 5px; }
+.weekly-events-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 20px; align-content: start; }
+.weekly-event-date { min-height: 40px; margin: 0 0 12px; font-size: 15px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; }
+.weekly-event-card-surface { min-height: 488px; padding: 24px; box-sizing: border-box; border: 1px solid rgba(255,255,255,.3); border-radius: 25px; background: rgba(40, 40, 38, .6); backdrop-filter: blur(12px); }
+.weekly-event-card-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 16px; }
+.weekly-event-card-meta span:first-child { padding: 8px 13px; border-radius: 99px; background: rgba(255,255,255,.16); font-size: 11px; font-weight: 800; letter-spacing: 4px; }
+.weekly-event-card-meta span:last-child { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; text-transform: uppercase; }
+.weekly-event-card-surface img { width: 100%; height: 250px; border-radius: 15px; object-fit: cover; }
+.weekly-event-card-time { display: flex; justify-content: space-between; align-items: baseline; margin-top: 18px; }
+.weekly-event-card-time strong { font-size: 17px; }
+.weekly-event-card-time span { font-size: 13px; opacity: .78; }
+.weekly-event-card-surface h2 { margin: 12px 0 0; font-size: 20px; line-height: 1.13; text-transform: uppercase; }
+.weekly-events-empty { margin: 80px 0 0; font-size: 22px; text-align: center; }
+
+/* ---- Weekly teacher WhatsApp bulletin ---- */
+.teacher-weekly-poster {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  padding: 58px 62px 68px;
+  box-sizing: border-box;
+  background: #efefee;
+  color: #131313;
+  font-family: Inter, Arial, sans-serif;
+}
+.teacher-weekly-poster::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,.45);
+  z-index: 0;
+}
+.teacher-weekly-watermark {
+  position: absolute;
+  width: 920px;
+  height: 1055px;
+  object-fit: contain;
+  top: 360px;
+  left: 78px;
+  opacity: .105;
+  filter: brightness(0);
+}
+.teacher-weekly-header,
+.teacher-weekly-columns,
+.teacher-weekly-footer { position: relative; z-index: 1; }
+.teacher-weekly-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+.teacher-weekly-title-block {
+  display: flex;
+  flex-direction: column;
+  min-width: 360px;
+  padding: 24px 30px 22px;
+  border-radius: 17px;
+  background: #ad4b20;
+  color: #fff;
+  text-transform: uppercase;
+}
+.teacher-weekly-title-block span { font-size: 30px; font-weight: 800; line-height: 1.05; }
+.teacher-weekly-title-block strong { margin-top: 8px; font-size: 27px; line-height: 1; }
+.teacher-weekly-meta { display: flex; flex-direction: column; align-items: flex-end; padding-top: 6px; }
+.teacher-weekly-meta > strong { font-size: 25px; line-height: 1; }
+.teacher-weekly-legend { display: flex; gap: 22px; margin-top: 15px; font-size: 15px; font-weight: 800; text-transform: uppercase; }
+.teacher-weekly-legend span { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.teacher-weekly-legend b,
+.teacher-weekly-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  background: #ad4b20;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1;
+}
+.teacher-weekly-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 58px; }
+.teacher-weekly-column { display: flex; flex-direction: column; gap: 30px; min-width: 0; }
+.teacher-weekly-day h2 {
+  display: inline-block;
+  margin: 0 0 15px;
+  padding: 12px 18px;
+  border-radius: 9px;
+  background: #ad4b20;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.teacher-weekly-rows { display: flex; flex-direction: column; gap: 5px; }
+.teacher-weekly-row { display: grid; grid-template-columns: 135px auto minmax(0, 1fr); gap: 11px; align-items: start; }
+.teacher-weekly-row time {
+  padding: 6px 9px;
+  border-radius: 7px;
+  background: rgba(255,255,255,.92);
+  font-size: 16px;
+  line-height: 1.05;
+  text-align: center;
+  white-space: nowrap;
+}
+.teacher-weekly-row p { margin: 5px 0 0; font-size: 16px; line-height: 1.08; text-transform: uppercase; }
+.teacher-weekly-row p strong { font-weight: 850; }
+.teacher-weekly-row p span { font-weight: 500; }
+.teacher-weekly-tag { width: 29px; height: 29px; margin-top: 1px; font-size: 16px; }
+.teacher-weekly-empty { margin: 3px 0 0; font-size: 15px; opacity: .65; }
+.teacher-weekly-footer {
+  position: absolute;
+  right: 62px;
+  bottom: 38px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}

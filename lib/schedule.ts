@@ -1,6 +1,6 @@
 import { parseCsv } from "./csv";
 import { buildSchedule } from "./parse";
-import { fetchMonthlyWeek } from "./monthSchedule";
+import { fetchMonthlyWeek, fetchWeeklyBackgroundImage } from "./monthSchedule";
 import { datesForWeek } from "./stories";
 import { FALLBACK_ROWS, TEACHER_PHOTOS } from "./fallback";
 import type { SchedulePayload } from "./types";
@@ -46,8 +46,15 @@ export async function getSchedule(): Promise<SchedulePayload> {
   // Minggu yang diambil = Senin–Minggu mendatang, sama dengan yang dipakai UI.
   const week = datesForWeek(TZ);
   const classesPromise = apiKey && sheetId ? fetchMonthlyWeek(apiKey, sheetId, week) : Promise.resolve(null);
+  const weeklyImagePromise = apiKey && sheetId
+    ? fetchWeeklyBackgroundImage(apiKey, sheetId, week.MONDAY)
+    : Promise.resolve(null);
   const photosPromise = teachersUrl ? fetchTeacherPhotos(teachersUrl) : Promise.resolve({});
-  const [classes, sheetPhotos] = await Promise.all([classesPromise, photosPromise]);
+  const [classes, sheetPhotos, weeklyBackgroundImage] = await Promise.all([
+    classesPromise,
+    photosPromise,
+    weeklyImagePromise,
+  ]);
 
   return {
     classes: classes ?? buildSchedule(FALLBACK_ROWS),
@@ -55,6 +62,7 @@ export async function getSchedule(): Promise<SchedulePayload> {
       ...TEACHER_PHOTOS,
       ...sheetPhotos,
     },
+    weeklyBackgroundImage,
     source: classes ? "sheet" : "fallback",
     fetchedAt: new Date().toISOString(),
   };

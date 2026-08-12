@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { Day, SchedulePayload } from "@/lib/types";
+import type { SchedulePayload } from "@/lib/types";
 import { DAYS } from "@/lib/types";
 import { datesForWeek, titleCase, weekRangeLabel } from "@/lib/stories";
 import { buildIcs, teacherEvents } from "@/lib/ics";
 
 const TZ = "Asia/Makassar";
 
-export function TeachersCalendar({ data }: { data: SchedulePayload }) {
+export function TeachersCalendar({ data, embedded = false }: { data: SchedulePayload; embedded?: boolean }) {
   const week = useMemo(() => datesForWeek(TZ), []);
   const rangeLabel = useMemo(() => weekRangeLabel([...DAYS], week, TZ), [week]);
   const [origin, setOrigin] = useState("");
@@ -62,15 +62,18 @@ export function TeachersCalendar({ data }: { data: SchedulePayload }) {
     URL.revokeObjectURL(url);
   };
 
-  return (
-    <main className="stories-shell">
+  const calendarContent = (
+    <>
+      {embedded && <h2 className="teacher-calendar-title" id="teacher-calendars">Teacher calendars</h2>}
+      {!embedded && (
       <header className="stories-head">
         <p className="stories-eyebrow">The Path · Canggu</p>
-        <h1 className="stories-title">Teacher Calendars</h1>
+        <h1 className="stories-title">Teacher Portal</h1>
         <a className="stories-back" href="/">
-          ← Back to schedule
+          ← Choose portal
         </a>
       </header>
+      )}
 
       <p className="cal-intro">
         Subscribe once and your classes keep syncing as the schedule changes — in Google Calendar,
@@ -78,7 +81,6 @@ export function TeachersCalendar({ data }: { data: SchedulePayload }) {
         tap <em>Subscribe</em>. (Google refreshes subscribed calendars on its own schedule, up to
         about a day.) Or grab a one-time file for this week ({rangeLabel}).
       </p>
-
       <div className="cal-grid">
         {teachers.map(({ name, classes }) => (
           <section className="cal-card" key={name}>
@@ -116,6 +118,12 @@ export function TeachersCalendar({ data }: { data: SchedulePayload }) {
           </section>
         ))}
       </div>
+    </>
+  );
+
+  return embedded ? calendarContent : (
+    <main className="stories-shell">
+      {calendarContent}
     </main>
   );
 }

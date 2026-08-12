@@ -95,6 +95,31 @@ button { cursor: pointer; }
   text-underline-offset: 3px;
 }
 .ig-stories-link:hover { opacity: 0.75; }
+
+/* Portal selector */
+.portal-intro {
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: clamp(28px, 7vw, 88px) clamp(20px, 5vw, 52px);
+}
+.portal-intro-head { margin-bottom: 42px; }
+.portal-intro-head h1 { margin: 0; font-size: clamp(54px, 10vw, 100px); line-height: .85; letter-spacing: -.05em; text-transform: uppercase; }
+.portal-intro-head > p:not(.eyebrow) { margin: 18px 0 0; max-width: 380px; font-size: 18px; line-height: 1.4; }
+.portal-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.portal-choice { display: flex; flex-direction: column; min-height: 270px; padding: 30px; border: 1.5px solid var(--hair); border-radius: 6px; background: var(--paper); color: var(--ink); text-decoration: none; transition: transform .15s ease, background .15s ease, color .15s ease; }
+.portal-choice:hover { transform: translateY(-3px); border-color: var(--ink); }
+.portal-choice-admin { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.portal-choice-admin:hover { background: var(--rust); border-color: var(--rust); }
+.portal-choice-kicker { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .62; }
+.portal-choice strong { margin-top: 27px; font-size: clamp(28px, 4vw, 42px); line-height: .95; text-transform: uppercase; }
+.portal-choice p { margin: 16px 0 0; max-width: 320px; font-size: 15px; line-height: 1.45; }
+.portal-choice-link { margin-top: auto; padding-top: 26px; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+@media (max-width: 640px) { .portal-choice-grid { grid-template-columns: 1fr; } .portal-choice { min-height: 220px; } }
 .live-dot {
   display: inline-block;
   width: 7px;

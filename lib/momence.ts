@@ -62,6 +62,15 @@ function teachersFor(session: MomenceSession): string[] {
   return [...new Set(teachers)];
 }
 
+/** Momence's public feed has no Event/Workshop field, so label the known special formats here. */
+function tagForSession(name: string): ClassItem["tag"] {
+  if (/\b(?:men|women)['’]?s circle\b/i.test(name)) return "EVENT";
+  if (/workshop|ceremony|sound healing|somatic|return to self|thai yoga massage|meditate\.?\s*heal\.?\s*transform/i.test(name)) {
+    return "WORKSHOP";
+  }
+  return null;
+}
+
 async function fetchPage(hostId: string, fromDate: string, toDate: string, page: number) {
   const url = new URL(`${API}/host-plugins/host/${hostId}/host-schedule/sessions`);
   url.searchParams.set("fromDate", fromDate);
@@ -115,7 +124,7 @@ export async function getMomenceTomorrow(): Promise<ClassItem[] | null> {
           timeLabel: `${formatTime(start.minutes)} – ${formatTime(end.minutes)}`,
           note: "",
           needsCover: false,
-          tag: null,
+          tag: tagForSession(session.sessionName),
         } satisfies ClassItem;
       });
 
