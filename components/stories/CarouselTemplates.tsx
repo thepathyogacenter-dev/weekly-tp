@@ -17,22 +17,13 @@ function firstTeacher(event: ClassItem) {
 }
 
 export function CarouselCoverTemplate({
-  weekLabel,
   image,
 }: {
-  weekLabel: string;
   image: string;
 }) {
   return (
     <section className="carousel-post carousel-cover">
       <img src={image} alt="" />
-      <div className="carousel-cover-overlay" />
-      <div className="carousel-cover-copy">
-        <p>This week&apos;s</p>
-        <h1>Workshops<br />&amp; Events</h1>
-        <strong>{weekLabel}</strong>
-        <span aria-hidden="true">⟶</span>
-      </div>
     </section>
   );
 }

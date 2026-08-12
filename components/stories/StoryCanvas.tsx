@@ -76,7 +76,7 @@ export function StoryCanvas({
       </div>
       <div className="story-actions">
         <button type="button" className="story-download" onClick={onDownload} disabled={busy}>
-          {busy ? "Preparing…" : `Download ${label}`}
+          {busy ? "Preparing…" : "Download"}
         </button>
         <button type="button" className="story-share" onClick={onShare} disabled={busy} aria-label={`Share ${label}`} title="Share image">
           <span aria-hidden="true">↗</span>

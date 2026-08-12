@@ -172,7 +172,17 @@ export function StoriesClient({
             <div>
               <p className="stories-panel-label">Weekly Instagram posts</p>
               <h2 id="carousel-admin-title">Workshops & events carousel</h2>
-              <p>Download the cover first, then the individual event and workshop posts in order.</p>
+              <p>Use the same image uploads as the Events & Workshops story. Each uploaded image is automatically used on its matching carousel post.</p>
+            </div>
+            <div className="weekly-events-upload-list">
+              {weeklyEvents.map((event) => (
+                <label className="weekly-events-upload" key={`carousel-upload-${event.id}`}>
+                  <span>{event.tag === "EVENT" ? "E" : "W"}</span>
+                  <strong>{event.name}</strong>
+                  <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => uploadEventImage(event.id, e.target.files?.[0])} />
+                  <em>{eventImages[event.id] ? "Image linked to post" : "Upload image for post"}</em>
+                </label>
+              ))}
             </div>
           </section>
           <div className="stories-grid">
@@ -180,8 +190,7 @@ export function StoriesClient({
               <p className="stories-panel-label">Cover</p>
               <StoryCanvas filename="weekly-workshops-events-cover.png" label="Weekly posts carousel cover" width={1080} height={1350}>
                 <CarouselCoverTemplate
-                  weekLabel={weekRangeLabel(["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"], week, TZ)}
-                  image={eventImages[weeklyEvents[0]?.id] ?? data.weeklyBackgroundImage ?? "/stories/weekly-schedule-photo.png"}
+                  image="/stories/weekly-posts-carousel-cover.png"
                 />
               </StoryCanvas>
             </div>
@@ -239,7 +248,7 @@ export function StoriesClient({
             <div>
               <p className="stories-panel-label">New weekly story</p>
               <h2 id="weekly-events-admin-title">Events & workshops</h2>
-              <p>Upload a photo for each card, then download the completed weekly story.</p>
+              <p>Upload a photo for each card. The same image is automatically shared with its Weekly Posts Carousel post.</p>
             </div>
             <div className="weekly-events-upload-list">
               {weeklyEvents.map((event) => (
@@ -247,7 +256,7 @@ export function StoriesClient({
                   <span>{event.tag === "EVENT" ? "E" : "W"}</span>
                   <strong>{event.name}</strong>
                   <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => uploadEventImage(event.id, e.target.files?.[0])} />
-                  <em>{eventImages[event.id] ? "Replace image" : "Upload image"}</em>
+                  <em>{eventImages[event.id] ? "Image linked to carousel" : "Upload image"}</em>
                 </label>
               ))}
             </div>
