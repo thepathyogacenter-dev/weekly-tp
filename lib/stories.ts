@@ -15,7 +15,7 @@ export const WEEKLY_GROUPS: WeeklyGroup[] = [
 export type Period = "AM" | "NOON" | "PM";
 
 const NOON_START = 12 * 60; // 12:00
-const PM_START = 15 * 60; // 15:00
+const PM_START = 13 * 60; // 13:00 — Noon is only the 12 PM hour
 
 export function periodOf(start: number | null): Period {
   if (start === null) return "PM";

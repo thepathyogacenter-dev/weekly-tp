@@ -9,12 +9,16 @@ export function StoryCanvas({
   children,
   width = 1080,
   height = 1920,
+  canvasId,
+  hideActions = false,
 }: {
   filename: string;
   label: string;
   children: ReactNode;
   width?: number;
   height?: number;
+  canvasId?: string;
+  hideActions?: boolean;
 }) {
   const sizerRef = useRef<HTMLDivElement>(null);
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -69,20 +73,22 @@ export function StoryCanvas({
     <div className="story-canvas">
       <div className="story-canvas-sizer" ref={sizerRef} style={{ "--story-scale": scale, "--story-width": `${width}px`, "--story-height": `${height}px` } as React.CSSProperties}>
         <div className="story-canvas-frame" style={{ "--story-scale": scale } as React.CSSProperties}>
-          <div className="story-node" ref={nodeRef} style={{ width, height }}>
+          <div className="story-node" id={canvasId} ref={nodeRef} style={{ width, height }}>
             {children}
           </div>
         </div>
       </div>
-      <div className="story-actions">
-        <button type="button" className="story-download" onClick={onDownload} disabled={busy}>
-          {busy ? "Preparing…" : "Download"}
-        </button>
-        <button type="button" className="story-share" onClick={onShare} disabled={busy} aria-label={`Share ${label}`} title="Share image">
-          <span aria-hidden="true">↗</span>
-          <span>{shareStatus === "copied" ? "Copied" : shareStatus === "unavailable" ? "Downloaded" : "Share"}</span>
-        </button>
-      </div>
+      {!hideActions && (
+        <div className="story-actions">
+          <button type="button" className="story-download" onClick={onDownload} disabled={busy}>
+            {busy ? "Preparing…" : "Download"}
+          </button>
+          <button type="button" className="story-share" onClick={onShare} disabled={busy} aria-label={`Share ${label}`} title="Share image">
+            <span aria-hidden="true">↗</span>
+            <span>{shareStatus === "copied" ? "Copied" : shareStatus === "unavailable" ? "Downloaded" : "Share"}</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

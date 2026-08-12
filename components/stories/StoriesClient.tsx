@@ -18,6 +18,7 @@ import { WeeklyStoryTemplate } from "./WeeklyStoryTemplate";
 import { WeeklyEventsTemplate } from "./WeeklyEventsTemplate";
 import { AdminScheduleEditor } from "./AdminScheduleEditor";
 import { CarouselCoverTemplate, CarouselEventTemplate } from "./CarouselTemplates";
+import { CarouselDownloadButton } from "./CarouselDownloadButton";
 
 const TZ = "Asia/Makassar";
 
@@ -185,10 +186,21 @@ export function StoriesClient({
               ))}
             </div>
           </section>
+          <div className="carousel-download-bar">
+            <CarouselDownloadButton
+              items={[
+                { canvasId: "weekly-carousel-cover", filename: "weekly-workshops-events-cover.png" },
+                ...weeklyEvents.map((event, index) => ({
+                  canvasId: `weekly-carousel-${event.id}`,
+                  filename: `weekly-carousel-${index + 1}-${event.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.png`,
+                })),
+              ]}
+            />
+          </div>
           <div className="stories-grid">
             <div>
               <p className="stories-panel-label">Cover</p>
-              <StoryCanvas filename="weekly-workshops-events-cover.png" label="Weekly posts carousel cover" width={1080} height={1350}>
+              <StoryCanvas filename="weekly-workshops-events-cover.png" label="Weekly posts carousel cover" width={1080} height={1350} canvasId="weekly-carousel-cover" hideActions>
                 <CarouselCoverTemplate
                   image="/stories/weekly-posts-carousel-cover.png"
                 />
@@ -197,7 +209,7 @@ export function StoriesClient({
             {weeklyEvents.map((event, index) => (
               <div key={`carousel-${event.id}`}>
                 <p className="stories-panel-label">Post {index + 1}</p>
-                <StoryCanvas filename={`weekly-carousel-${index + 1}-${event.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.png`} label={event.name} width={1080} height={1350}>
+                <StoryCanvas filename={`weekly-carousel-${index + 1}-${event.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.png`} label={event.name} width={1080} height={1350} canvasId={`weekly-carousel-${event.id}`} hideActions>
                   <CarouselEventTemplate event={event} week={week} image={eventImages[event.id] ?? "/stories/weekly-schedule-photo.png"} />
                 </StoryCanvas>
               </div>
