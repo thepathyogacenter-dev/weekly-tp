@@ -431,8 +431,8 @@
 .story-entry::before {
   content: "";
   position: absolute;
-  /* Card begins at 126px; centre the 22px dot over the 96px timeline. */
-  left: -41px;
+  /* The entry starts 44px inside the card: centre its 22px dot on the line. */
+  left: -85px;
   top: 0;
   width: 22px;
   height: 22px;
