@@ -52,10 +52,6 @@ export function DailyStoryTemplate({
         <div className="story-body">
           <div className="story-shala-heading-row">
             <div className="story-shala-heading">{shalaLabel}</div>
-            <div className="story-badge-key" aria-label="Schedule legend">
-              <span><b>E</b> Event</span>
-              <span><b>W</b> Workshop</span>
-            </div>
           </div>
 
           {entries.length === 0 ? (

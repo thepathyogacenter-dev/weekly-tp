@@ -10,3 +10,4 @@ out
 .netlify
 .vercel
 .env*
+!.env.example

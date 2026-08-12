@@ -62,6 +62,9 @@ ADMIN_SESSION_SECRET=your-long-random-session-secret
 Keep both values private. The `/teachers` portal remains accessible to teachers without the
 admin password.
 
+Never commit `.env.local`, an admin password, or the session secret. The public repository
+contains only `.env.example`, which is safe to share because it has blank values.
+
 ## Embed in Webflow
 
 Deploy, then drop an Embed element on the page:

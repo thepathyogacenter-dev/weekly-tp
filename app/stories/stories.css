@@ -83,6 +83,49 @@
 }
 .stories-tab[data-active="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 
+/* ---- Admin schedule editor ---- */
+.admin-schedule { margin-top: 32px; }
+.admin-schedule-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding-bottom: 22px; border-bottom: 1.5px solid var(--ink); }
+.admin-schedule-head .stories-panel-label { text-align: left; margin-bottom: 7px; }
+.admin-schedule-head h2 { margin: 0; font-size: clamp(30px, 4vw, 48px); line-height: .95; text-transform: uppercase; }
+.admin-schedule-head p:not(.stories-panel-label) { max-width: 680px; margin: 14px 0 0; line-height: 1.45; }
+.admin-reset, .admin-add-class, .admin-schedule-item button, .admin-edit-actions button { border-radius: 3px; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+.admin-reset { flex: 0 0 auto; padding: 10px 12px; border: 1.5px solid var(--ink); background: var(--ink); color: var(--paper); }
+.admin-schedule-grid { display: grid; grid-template-columns: repeat(7, minmax(210px, 1fr)); gap: 16px; overflow-x: auto; padding: 28px 0 12px; }
+.admin-schedule-day { min-height: 270px; padding: 14px; border: 1px solid var(--hair); border-radius: 5px; background: rgba(255,255,255,.28); }
+.admin-schedule-day > header { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 10px; border-bottom: 1.5px solid var(--ink); }
+.admin-schedule-day h3 { margin: 0; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; }
+.admin-schedule-day header span { font-family: var(--mono); font-size: 10px; opacity: .5; }
+.admin-schedule-list { display: flex; flex-direction: column; }
+.admin-schedule-item { display: grid; grid-template-columns: 52px minmax(0, 1fr); column-gap: 8px; position: relative; padding: 12px 0; border-bottom: 1px solid var(--hair-soft); }
+.admin-schedule-item[data-cover="true"] { box-shadow: inset 3px 0 0 var(--rust); padding-left: 7px; }
+.admin-schedule-time { font-family: var(--mono); font-size: 10px; line-height: 1.25; opacity: .7; }
+.admin-schedule-copy { min-width: 0; }
+.admin-schedule-name-row { display: flex; align-items: flex-start; gap: 5px; }
+.admin-schedule-copy strong { font-size: 13px; line-height: 1.12; text-transform: uppercase; }
+.admin-schedule-copy span, .admin-schedule-copy small { display: block; margin-top: 4px; font-size: 11px; line-height: 1.2; }
+.admin-schedule-copy small { font-family: var(--mono); font-size: 9px; letter-spacing: .04em; opacity: .6; }
+.admin-schedule-copy b { flex: 0 0 auto; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 3px; background: var(--rust); color: var(--paper); font-family: var(--mono); font-size: 10px; }
+.admin-schedule-item > button { grid-column: 2; justify-self: start; margin-top: 7px; border: 0; border-bottom: 1px solid var(--ink); padding: 0; background: transparent; color: var(--ink); }
+.admin-add-class { margin-top: 13px; border: 1px dashed var(--hair); padding: 8px; width: 100%; background: transparent; color: var(--ink); }
+.admin-add-class:hover, .admin-schedule-item > button:hover { color: var(--rust); border-color: var(--rust); }
+.admin-edit-backdrop { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 22px; background: rgba(18, 17, 14, .45); }
+.admin-edit-form { width: min(100%, 520px); display: flex; flex-direction: column; gap: 13px; padding: 24px; border-radius: 6px; background: var(--paper); box-shadow: 0 18px 60px rgba(0,0,0,.28); }
+.admin-edit-title { display: flex; align-items: center; justify-content: space-between; padding-bottom: 13px; border-bottom: 1px solid var(--hair); }
+.admin-edit-title h3 { margin: 0; font-size: 25px; text-transform: uppercase; }
+.admin-edit-title button { border: 0; background: transparent; color: var(--ink); font-size: 28px; cursor: pointer; }
+.admin-edit-form label { display: flex; flex-direction: column; gap: 6px; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.admin-edit-form input, .admin-edit-form select { min-height: 38px; box-sizing: border-box; border: 1px solid var(--hair); border-radius: 3px; padding: 8px 10px; background: #fff; color: var(--ink); font: 14px var(--story-font); letter-spacing: normal; text-transform: none; }
+.admin-edit-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.admin-cover-toggle { flex-direction: row !important; align-items: center; padding-top: 2px; font-family: var(--story-font) !important; font-size: 13px !important; font-weight: 500 !important; letter-spacing: normal !important; text-transform: none !important; }
+.admin-cover-toggle input { min-height: auto !important; }
+.admin-edit-actions { display: grid; grid-template-columns: auto 1fr auto auto; gap: 8px; align-items: center; padding-top: 8px; }
+.admin-edit-actions button { padding: 10px 11px; }
+.admin-delete { border: 1px solid #a72e1f; background: transparent; color: #a72e1f; }
+.admin-cancel { border: 1px solid var(--hair); background: transparent; color: var(--ink); }
+.admin-save { border: 1px solid var(--ink); background: var(--ink); color: var(--paper); }
+@media (max-width: 700px) { .admin-schedule-head { align-items: flex-start; flex-direction: column; } .admin-schedule-grid { grid-template-columns: repeat(7, minmax(245px, 1fr)); } }
+
 .stories-day-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 32px; }
 .stories-day-chip {
   border: 1.5px solid var(--hair);
@@ -319,22 +362,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 77px;
+  padding: 96px 85px 76px;
 }
 
-.story-logo { width: 160px; height: 176px; object-fit: contain; margin-bottom: 44px; }
+.story-logo { width: 160px; height: 184px; object-fit: contain; margin-bottom: 32px; }
 
-.story-header { display: flex; flex-direction: column; align-items: center; gap: 28px; margin-bottom: 116px; }
+.story-header { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 56px; }
 .story-h1 {
   margin: 0;
-  font-size: 92px;
+  font-size: 96px;
   font-weight: 500;
   letter-spacing: 4.6px;
   text-align: center;
   line-height: 1;
 }
 .story-date {
-  font-family: "Inter", var(--story-font);
+  font-family: var(--story-font);
   font-size: 24px;
   font-weight: 500;
   letter-spacing: 6px;
@@ -342,47 +385,44 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
-.story-body { flex: 1; width: 100%; display: flex; flex-direction: column; gap: 24px; min-height: 0; }
+.story-body { flex: 1; width: 910px; display: flex; flex-direction: column; gap: 24px; min-height: 0; }
 .story-shala-heading {
   font-size: 36px;
   font-weight: 700;
   letter-spacing: 6px;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.92);
+  color: rgba(255, 255, 255, 0.9);
 }
-.story-shala-heading-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
-.story-badge-key { display: flex; align-items: center; gap: 16px; font-family: Inter, var(--story-font); font-size: 15px; font-weight: 700; text-transform: uppercase; }
-.story-badge-key span { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
-.story-badge-key b { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 4px; background: rgba(255,255,255,.3); font-size: 16px; }
+.story-shala-heading-row { display: flex; align-items: center; }
 
-.story-timeline { position: relative; display: flex; flex-direction: column; gap: 40px; }
+.story-timeline { position: relative; width: 882px; margin-left: 28px; display: flex; flex-direction: column; gap: 36px; }
 .story-timeline::before {
   content: "";
   position: absolute;
-  left: 102px;
+  left: 96px;
   top: 0;
   bottom: 0;
   width: 3px;
   background: rgba(255, 255, 255, 0.9);
 }
-.story-period-row { display: flex; align-items: flex-start; gap: 40px; }
+.story-period-row { display: flex; align-items: flex-start; gap: 30px; }
 .story-period-label {
   flex: 0 0 96px;
-  padding-top: 34px;
-  font-size: 26px;
+  padding-top: 30px;
+  font-size: 30px;
   font-weight: 500;
   letter-spacing: 2px;
   text-align: left;
   white-space: nowrap;
 }
 .story-glass-card {
-  width: 572px;;
-  flex: 1;
+  width: 660px;
+  flex: 0 0 660px;
   position: relative;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(12px);
   border-radius: 24px;
-  padding: 32px;
+  padding: 36px 44px 48px;
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -391,23 +431,23 @@
 .story-entry::before {
   content: "";
   position: absolute;
-  left: -75px;
-  top: 6px;
+  left: -123px;
+  top: 0;
   width: 22px;
   height: 22px;
   border-radius: 50%;
   background: #fff;
 }
 .story-entry-top { display: block; }
-.story-entry-title-line { display: flex; align-items: flex-start; gap: 12px; }
+.story-entry-title-line { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .story-entry-name { font-size: 36px; font-weight: 500; line-height: 1.15; }
 .story-entry-meta { font-size: 24px; color: rgba(255, 255, 255, 0.9); display: flex; gap: 14px; align-items: baseline; }
 /* Badge event/workshop */
 .story-tag-badge {
   flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
-  margin-top: 5px;
+  width: 40px;
+  height: 36px;
+  margin-top: 0;
   background: rgba(255, 255, 255, 0.3);
   border-radius: 4px;
   display: flex;
@@ -415,7 +455,7 @@
   justify-content: center;
 }
 .story-tag-badge span {
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 700;
   text-transform: uppercase;
   line-height: 1;
@@ -451,7 +491,7 @@
   flex-direction: column;
   align-items: center;
   color: #fcfcfc;
-  font-family: Inter, Arial, sans-serif;
+  font-family: var(--story-font);
 }
 .weekly-poster-title {
   margin: 0;
@@ -469,7 +509,7 @@
   padding: 9px 11px;
   border: 1px solid #fff;
   border-radius: 30px;
-  font-family: Inter, Arial, sans-serif;
+  font-family: var(--story-font);
   font-size: 19px;
   font-weight: 800;
   line-height: 24px;
@@ -501,7 +541,7 @@
   padding: 6px 12px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.25);
-  font-family: Inter, Arial, sans-serif;
+  font-family: var(--story-font);
   font-size: 17px;
   font-weight: 800;
   line-height: 23px;
@@ -532,7 +572,7 @@
 .weekly-poster-time small { margin-top: 1px; font-size: 10px; line-height: 1; }
 .weekly-poster-class { min-width: 0; display: flex; flex-direction: column; }
 .weekly-poster-class strong {
-  font-family: Inter, Arial, sans-serif;
+  font-family: var(--story-font);
   font-size: 18px;
   font-weight: 800;
   line-height: 1.05;
@@ -548,7 +588,7 @@
   height: 27px;
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.25);
-  font-family: Inter, Arial, sans-serif;
+  font-family: var(--story-font);
   font-size: 15px;
   font-weight: 800;
 }
@@ -563,7 +603,7 @@
 }
 .weekly-poster-footer img { width: 161px; height: 185px; object-fit: cover; }
 .weekly-poster-footer p { margin: 10px 0 14px; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 28px; font-weight: 500; line-height: 1; }
-.weekly-poster-key { display: flex; gap: 30px; font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 800; text-transform: uppercase; }
+.weekly-poster-key { display: flex; gap: 30px; font-family: var(--story-font); font-size: 16px; font-weight: 800; text-transform: uppercase; }
 .weekly-poster-key span { display: inline-flex; align-items: center; gap: 10px; }
 .weekly-poster-key b { width: 28px; height: 28px; font-size: 16px; }
 
@@ -579,7 +619,7 @@
 .weekly-events-upload strong { font-size: 13px; line-height: 1.2; text-transform: uppercase; }
 .weekly-events-upload input { grid-column: 1 / -1; width: 100%; font-size: 12px; }
 .weekly-events-upload em { grid-column: 1 / -1; color: var(--rust); font-family: var(--mono); font-size: 10px; font-style: normal; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-.weekly-events-poster { position: relative; width: 100%; height: 100%; overflow: hidden; padding: 96px 48px 70px; box-sizing: border-box; color: #fff; font-family: Inter, Arial, sans-serif; }
+.weekly-events-poster { position: relative; width: 100%; height: 100%; overflow: hidden; padding: 96px 48px 70px; box-sizing: border-box; color: #fff; font-family: var(--story-font); }
 .weekly-events-background, .weekly-events-overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
 .weekly-events-background { object-fit: cover; }
 .weekly-events-overlay { background: rgba(18, 24, 18, .58); backdrop-filter: blur(4px); }
@@ -611,7 +651,7 @@
   box-sizing: border-box;
   background: #efefee;
   color: #131313;
-  font-family: Inter, Arial, sans-serif;
+  font-family: var(--story-font);
 }
 .teacher-weekly-poster::before {
   content: "";

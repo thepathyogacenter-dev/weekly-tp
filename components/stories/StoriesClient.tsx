@@ -16,6 +16,7 @@ import { DailyStoryTemplate } from "./DailyStoryTemplate";
 import { TeacherWeeklyTemplate } from "./TeacherWeeklyTemplate";
 import { WeeklyStoryTemplate } from "./WeeklyStoryTemplate";
 import { WeeklyEventsTemplate } from "./WeeklyEventsTemplate";
+import { AdminScheduleEditor } from "./AdminScheduleEditor";
 
 const TZ = "Asia/Makassar";
 
@@ -32,21 +33,24 @@ export function StoriesClient({
   dailyDate: string;
   momenceAvailable: boolean;
 }) {
-  const [tab, setTab] = useState<"daily" | "weekly">("daily");
+  const [tab, setTab] = useState<"daily" | "weekly" | "schedule">("daily");
+  const [adminClasses, setAdminClasses] = useState<ClassItem[]>(data.classes);
+  const [scheduleLoaded, setScheduleLoaded] = useState(false);
 
-  const week = datesForWeek(TZ);
+  const week = useMemo(() => datesForWeek(TZ), []);
   const { outdoor, indoor } = splitBySpace(dailyClasses);
   const dateLabel = formatDateLabel(new Date(dailyDate), TZ);
+  const scheduleStorageKey = `the-path-admin-schedule-${week.MONDAY.toISOString().slice(0, 10)}`;
 
   const classesByDay: Record<Day, ClassItem[]> = Object.fromEntries(
     ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"].map((d) => [
       d,
-      classesForDay(data.classes, d as Day),
+      classesForDay(adminClasses, d as Day),
     ])
   ) as Record<Day, ClassItem[]>;
   const weeklyEvents = useMemo(
     () =>
-      data.classes
+      adminClasses
         .filter((classItem) => classItem.tag !== null)
         .sort(
           (a, b) =>
@@ -54,10 +58,35 @@ export function StoriesClient({
               ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"].indexOf(b.day) ||
             (a.start ?? 1e6) - (b.start ?? 1e6)
         ),
-    [data.classes]
+    [adminClasses]
   );
   const storageKey = `the-path-weekly-event-images-${week.MONDAY.toISOString().slice(0, 10)}`;
   const [eventImages, setEventImages] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(scheduleStorageKey);
+      setAdminClasses(saved ? JSON.parse(saved) : data.classes);
+    } catch {
+      setAdminClasses(data.classes);
+    } finally {
+      setScheduleLoaded(true);
+    }
+  }, [data.classes, scheduleStorageKey]);
+
+  useEffect(() => {
+    if (!scheduleLoaded) return;
+    try {
+      window.localStorage.setItem(scheduleStorageKey, JSON.stringify(adminClasses));
+    } catch {
+      // The source schedule remains available if local browser storage is full.
+    }
+  }, [adminClasses, scheduleLoaded, scheduleStorageKey]);
+
+  const resetAdminClasses = () => {
+    window.localStorage.removeItem(scheduleStorageKey);
+    setAdminClasses(data.classes);
+  };
 
   useEffect(() => {
     try {
@@ -116,9 +145,19 @@ export function StoriesClient({
         >
           Weekly
         </button>
+        <button
+          type="button"
+          className="stories-tab"
+          data-active={tab === "schedule"}
+          onClick={() => setTab("schedule")}
+        >
+          Schedule editor
+        </button>
       </div>
 
-      {tab === "daily" ? (
+      {tab === "schedule" ? (
+        <AdminScheduleEditor classes={adminClasses} onChange={setAdminClasses} onReset={resetAdminClasses} />
+      ) : tab === "daily" ? (
         <>
           <p className="stories-panel-label">Tomorrow · {titleCase(dailyDay)}</p>
 

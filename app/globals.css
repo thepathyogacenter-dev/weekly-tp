@@ -9,8 +9,8 @@
   --hair: rgba(22, 21, 15, 0.14);
   --hair-soft: rgba(22, 21, 15, 0.07);
 
-  --display: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --display: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   --rail: 62px;
   --gap: clamp(20px, 3vw, 34px);
