@@ -126,12 +126,10 @@ export function formatDateLabel(date: Date, tz: string): string {
  * put next Wednesday *after* today's Thursday).
  */
 export function datesForWeek(tz: string, now = new Date()): Record<Day, Date> {
-  const dayName = dayInTimeZone(tz, now);
-  const monday = nextDate("MONDAY", tz, now);
-  // Jika hari ini Minggu, tarik mundur 7 hari agar Senin di minggu ini yang tampil
-  if (dayName === "SUNDAY") {
-    monday.setUTCDate(monday.getUTCDate() - 7);
-  }
+  const today = calendarDateInTimeZone(tz, now);
+  const dayIndex = DAYS.indexOf(dayInTimeZone(tz, now));
+  // Anchor to this week's Monday, never the following Monday.
+  const monday = addCalendarDays(today, -dayIndex);
   const out = {} as Record<Day, Date>;
   DAYS.forEach((day, i) => {
     out[day] = addCalendarDays(monday, i);
