@@ -29,7 +29,7 @@ export function CarouselCoverTemplate({
       <div className="carousel-cover-overlay" />
       <div className="carousel-cover-copy">
         <p>This week&apos;s</p>
-        <h1>Workshops<br />&amp; Events</h1>
+        <h1>Workshop</h1>
         <strong>{weekLabel}</strong>
         <span aria-hidden="true">⟶</span>
       </div>
