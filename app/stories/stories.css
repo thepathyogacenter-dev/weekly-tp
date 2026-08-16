@@ -467,8 +467,8 @@
 }
 .story-entry-top { display: block; }
 .story-entry-title-line { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.story-entry-name { font-size: 36px; font-weight: 500; line-height: 1.15; }
-.story-entry-meta { font-size: 24px; color: rgba(255, 255, 255, 0.9); display: flex; gap: 14px; align-items: baseline; }
+.story-entry-name { font-size: 38px; font-weight: 800; line-height: 1.15; }
+.story-entry-meta { font-size: 28px; color: rgba(255, 255, 255, 0.9); display: flex; gap: 14px; align-items: baseline; }
 /* Badge event/workshop */
 .story-tag-badge {
   flex: 0 0 auto;
@@ -648,29 +648,29 @@
 .weekly-events-upload strong { font-size: 13px; line-height: 1.2; text-transform: uppercase; }
 .weekly-events-upload input { grid-column: 1 / -1; width: 100%; font-size: 12px; }
 .weekly-events-upload em { grid-column: 1 / -1; color: var(--rust); font-family: var(--mono); font-size: 10px; font-style: normal; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-.weekly-events-poster { position: relative; width: 100%; height: 100%; overflow: hidden; padding: 96px 48px 70px; box-sizing: border-box; color: #fff; font-family: var(--story-font); }
+.weekly-events-poster { position: relative; width: 100%; height: 100%; overflow: hidden; padding: 72px 48px 58px; box-sizing: border-box; color: #fff; font-family: var(--story-font); }
 .weekly-events-background, .weekly-events-overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
 .weekly-events-background { object-fit: cover; }
 .weekly-events-overlay { background: rgba(90, 90, 90, 0.59); backdrop-filter: blur(1px); }
 .weekly-events-header, .weekly-events-grid, .weekly-events-empty { position: relative; z-index: 1; }
-.weekly-events-header { display: grid; grid-template-columns: 161px 1fr; align-items: center; gap: 28px; margin-bottom: 58px; }
-.weekly-events-header img { width: 161px; height: 185px; object-fit: contain; }
+.weekly-events-header { display: grid; grid-template-columns: 132px 1fr; align-items: center; gap: 24px; margin-bottom: 36px; }
+.weekly-events-header img { width: 132px; height: 152px; object-fit: contain; }
 .weekly-events-header > div { display: flex; flex-direction: column; align-items: center; }
-.weekly-events-header h1 { margin: 0; font-size: 60px; font-weight: 700; line-height: 1.05; letter-spacing: -.9px; text-align: center; }
-.weekly-events-header p { width: max-content; margin: 18px 0 0; padding: 12px 24px; border: 1px solid rgba(255,255,255,.5); border-radius: 99px; background: rgba(255,255,255,.1); backdrop-filter: blur(12px); font-size: 16px; font-weight: 500; letter-spacing: 6px; }
-.weekly-events-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 20px; align-content: start; }
-.weekly-event-date { min-height: 61px; display: flex; flex-direction: column; gap: 8px; margin: 0 0 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,.15); text-transform: uppercase; }
-.weekly-event-date span { color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 700; letter-spacing: 6px; }
-.weekly-event-date strong { font-size: 20px; line-height: 1; }
-.weekly-event-card-surface { min-height: 450px; padding: 24px; box-sizing: border-box; border: 1px solid rgba(255,255,255,.2); border-radius: 24px; background: rgba(255,255,255,.10); backdrop-filter: blur(12px); }
-.weekly-event-card-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 16px; }
-.weekly-event-card-meta span:first-child { padding: 8px 13px; border-radius: 99px; background: rgba(255,255,255,.1); font-size: 11px; font-weight: 500; letter-spacing: 4px; }
-.weekly-event-card-meta span:last-child { overflow: hidden; font-size: 19px; font-weight: 400; text-overflow: ellipsis; white-space: nowrap; text-transform: uppercase; }
-.weekly-event-card-surface img { width: 100%; height: 320px; border-radius: 16px; object-fit: cover; }
-.weekly-event-card-time { display: flex; justify-content: space-between; align-items: baseline; margin-top: 18px; }
-.weekly-event-card-time strong { font-size: 18px; }
-.weekly-event-card-time span { font-size: 14px; opacity: .7; }
-.weekly-event-card-surface h2 { margin: 12px 0 0; font-size: 20px; font-weight: 800; line-height: 1.13; text-transform: uppercase; }
+.weekly-events-header h1 { margin: 0; font-size: 54px; font-weight: 700; line-height: 1.05; letter-spacing: -.9px; text-align: center; }
+.weekly-events-header p { width: max-content; margin: 13px 0 0; padding: 9px 20px; border: 1px solid rgba(255,255,255,.5); border-radius: 99px; background: rgba(255,255,255,.1); backdrop-filter: blur(12px); font-size: 14px; font-weight: 500; letter-spacing: 5px; }
+.weekly-events-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 20px; align-content: start; }
+.weekly-event-date { min-height: 48px; display: flex; flex-direction: column; gap: 6px; margin: 0 0 11px; padding-bottom: 11px; border-bottom: 1px solid rgba(255,255,255,.15); text-transform: uppercase; }
+.weekly-event-date span { color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 700; letter-spacing: 5px; }
+.weekly-event-date strong { font-size: 17px; line-height: 1; }
+.weekly-event-card-surface { min-height: 332px; padding: 18px; box-sizing: border-box; border: 1px solid rgba(255,255,255,.2); border-radius: 20px; background: rgba(255,255,255,.10); backdrop-filter: blur(12px); }
+.weekly-event-card-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
+.weekly-event-card-meta span:first-child { padding: 6px 10px; border-radius: 99px; background: rgba(255,255,255,.1); font-size: 9px; font-weight: 500; letter-spacing: 3px; }
+.weekly-event-card-meta span:last-child { overflow: hidden; font-size: 14px; font-weight: 400; text-overflow: ellipsis; white-space: nowrap; text-transform: uppercase; }
+.weekly-event-card-surface img { width: 100%; height: 190px; border-radius: 13px; object-fit: cover; }
+.weekly-event-card-time { display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px; }
+.weekly-event-card-time strong { font-size: 14px; }
+.weekly-event-card-time span { font-size: 11px; opacity: .7; }
+.weekly-event-card-surface h2 { margin: 9px 0 0; font-size: 16px; font-weight: 800; line-height: 1.08; text-transform: uppercase; }
 .weekly-events-empty { margin: 80px 0 0; font-size: 22px; text-align: center; }
 
 /* ---- Weekly teacher WhatsApp bulletin ---- */
