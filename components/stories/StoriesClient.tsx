@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { type ClassItem, type Day, type SchedulePayload } from "@/lib/types";
 import {
   classesForDay,
@@ -45,7 +45,9 @@ export function StoriesClient({
     [adminClasses, dailyDay]
   );
   const dateLabel = formatDateLabel(new Date(dailyDate), TZ);
-  const scheduleStorageKey = `the-path-admin-schedule-${week.MONDAY.toISOString().slice(0, 10)}`;
+  const weekKey = week.MONDAY.toISOString().slice(0, 10);
+  const scheduleStorageKey = `the-path-admin-schedule-${weekKey}`;
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const classesByDay: Record<Day, ClassItem[]> = Object.fromEntries(
     ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"].map((d) => [
@@ -69,15 +71,34 @@ export function StoriesClient({
   const [eventImages, setEventImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(scheduleStorageKey);
-      setAdminClasses(saved ? JSON.parse(saved) : data.classes);
-    } catch {
-      setAdminClasses(data.classes);
-    } finally {
-      setScheduleLoaded(true);
-    }
-  }, [data.classes, scheduleStorageKey]);
+    let active = true;
+    (async () => {
+      // Shared server overrides win so every device sees the same live edits;
+      // fall back to this browser's cache, then to the source schedule.
+      try {
+        const res = await fetch(`/api/admin/schedule?week=${weekKey}`, { cache: "no-store" });
+        const json = res.ok ? await res.json() : null;
+        if (active && Array.isArray(json?.classes) && json.classes.length) {
+          setAdminClasses(json.classes as ClassItem[]);
+          return;
+        }
+      } catch {
+        // fall through to local cache
+      }
+      if (!active) return;
+      try {
+        const saved = window.localStorage.getItem(scheduleStorageKey);
+        setAdminClasses(saved ? JSON.parse(saved) : data.classes);
+      } catch {
+        setAdminClasses(data.classes);
+      }
+    })().finally(() => {
+      if (active) setScheduleLoaded(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [data.classes, scheduleStorageKey, weekKey]);
 
   useEffect(() => {
     if (!scheduleLoaded) return;
@@ -88,7 +109,23 @@ export function StoriesClient({
     }
   }, [adminClasses, scheduleLoaded, scheduleStorageKey]);
 
+  // A user edit: update the UI, cache locally (effect above), and push to the
+  // shared server store (debounced) so other devices pick it up.
+  const applyChange = (next: ClassItem[]) => {
+    setAdminClasses(next);
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      fetch("/api/admin/schedule", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ week: weekKey, classes: next }),
+      }).catch(() => {});
+    }, 600);
+  };
+
   const resetAdminClasses = () => {
+    window.localStorage.removeItem(scheduleStorageKey);
+    fetch(`/api/admin/schedule?week=${weekKey}`, { method: "DELETE" }).catch(() => {});
     window.localStorage.removeItem(scheduleStorageKey);
     setAdminClasses(data.classes);
   };
@@ -169,7 +206,7 @@ export function StoriesClient({
       </div>
 
       {tab === "schedule" ? (
-        <AdminScheduleEditor classes={adminClasses} onChange={setAdminClasses} onReset={resetAdminClasses} />
+        <AdminScheduleEditor classes={adminClasses} onChange={applyChange} onReset={resetAdminClasses} />
       ) : tab === "carousel" ? (
         <>
           <section className="weekly-events-admin" aria-labelledby="carousel-admin-title">
