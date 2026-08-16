@@ -468,7 +468,7 @@
 .story-entry-top { display: block; }
 .story-entry-title-line { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .story-entry-name { font-size: 38px; font-weight: 800; line-height: 1.15; }
-.story-entry-meta { font-size: 28px; color: rgba(255, 255, 255, 0.9); display: flex; gap: 14px; align-items: baseline; }
+.story-entry-meta { font-size: 28px; font-weight: 500; color: rgba(255, 255, 255, 0); display: flex; gap: 14px; align-items: baseline; }
 /* Badge event/workshop */
 .story-tag-badge {
   flex: 0 0 auto;

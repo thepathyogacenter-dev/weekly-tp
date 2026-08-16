@@ -60,32 +60,31 @@ export function WeeklyStoryTemplate({
             <div className="weekly-poster-column" key={days.join("-")}>
               {days.map((day) => {
                 const classes = classesForShala(classesByDay[day], shala);
+                // Sembunyikan hari yang nggak punya kelas di shala ini (mis. Minggu
+                // di poster Indoor kalau semua kelas Minggu ada di Outdoor).
+                if (classes.length === 0) return null;
                 return (
                   <section className="weekly-poster-day" key={day}>
                     <h2>{titleCase(day)}</h2>
-                    {classes.length === 0 ? (
-                      <p className="weekly-poster-empty">No classes scheduled</p>
-                    ) : (
-                      <div className="weekly-poster-rows">
-                        {classes.map((classItem) => (
-                          <div className="weekly-poster-row" key={classItem.id}>
-                            <div className="weekly-poster-time">
-                              <span>{startTime(classItem)}</span>
-                              {duration(classItem) && <small>({duration(classItem)})</small>}
-                            </div>
-                            {classItem.tag && (
-                              <span className="weekly-poster-tag" aria-label={classItem.tag}>
-                                {classItem.tag === "WORKSHOP" ? "W" : "E"}
-                              </span>
-                            )}
-                            <div className="weekly-poster-class">
-                              <strong>{classItem.name}</strong>
-                              {classItem.teachers.length > 0 && <span>{classItem.teachers.join(", ")}</span>}
-                            </div>
+                    <div className="weekly-poster-rows">
+                      {classes.map((classItem) => (
+                        <div className="weekly-poster-row" key={classItem.id}>
+                          <div className="weekly-poster-time">
+                            <span>{startTime(classItem)}</span>
+                            {duration(classItem) && <small>({duration(classItem)})</small>}
                           </div>
-                        ))}
-                      </div>
-                    )}
+                          {classItem.tag && (
+                            <span className="weekly-poster-tag" aria-label={classItem.tag}>
+                              {classItem.tag === "WORKSHOP" ? "W" : "E"}
+                            </span>
+                          )}
+                          <div className="weekly-poster-class">
+                            <strong>{classItem.name}</strong>
+                            {classItem.teachers.length > 0 && <span>{classItem.teachers.join(", ")}</span>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </section>
                 );
               })}
