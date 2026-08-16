@@ -339,11 +339,11 @@
 .carousel-post > img, .carousel-cover-overlay, .carousel-event-overlay { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .carousel-cover > img { object-fit: cover; }
 .carousel-cover-overlay { background: linear-gradient(100deg, rgba(20,12,9,.65) 0%, rgba(54,25,16,.36) 42%, rgba(17,10,8,.07) 76%); }
-.carousel-cover-copy { position: absolute; z-index: 1; left: 166px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: flex-start; }
+.carousel-cover-copy { position: absolute; z-index: 1; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; position:inherit }
 .carousel-cover-copy p { margin: 0; font-size: 85px; font-weight: 400; line-height: .98; }
 .carousel-cover-copy h1 { margin: 8px 0 30px; font-size: 96px; font-weight: 800; line-height: .87; }
 .carousel-cover-copy strong { font-size: 34px; letter-spacing: 9px; }
-.carousel-cover-copy span { margin: 56px 0 0 41px; font-family: Arial, sans-serif; font-size: 108px; font-weight: 300; line-height: .6; }
+.carousel-cover-copy span { display: inline-block; margin: 0 0 0 0; font-family: Arial, sans-serif; font-size: 108px; font-weight: 300; line-height: .6; transform: scaleX(2.2); }
 .carousel-event-overlay { background: linear-gradient(44.75deg, #433B38 0%, rgba(97, 53, 33, 0) 56.44%); }
 .carousel-event-copy { position: absolute; left: 0; right: 0; top: 500px; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 112px; }
 .carousel-type { margin: 0 0 24px; font-size: 19px; font-weight: 700; letter-spacing: 7px; }
