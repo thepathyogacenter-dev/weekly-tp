@@ -1,5 +1,5 @@
-import { tomorrowInTimeZone } from "./stories";
-import { type ClassItem, type Day, type Space } from "./types";
+import { datesForWeek } from "./stories";
+import { DAYS, type ClassItem, type Day, type Space } from "./types";
 
 const API = "https://readonly-api.momence.com";
 const TZ = "Asia/Makassar";
@@ -84,50 +84,58 @@ async function fetchPage(hostId: string, fromDate: string, toDate: string, page:
   return (await response.json()) as MomenceSessionsResponse;
 }
 
+/** Fetch every (paginated) session in the [fromDate, toDate) window. */
+async function fetchSessions(hostId: string, fromDate: string, toDate: string): Promise<MomenceSession[]> {
+  const first = await fetchPage(hostId, fromDate, toDate, 0);
+  const total = first.pagination?.totalCount ?? first.payload?.length ?? 0;
+  const remainingPages = Math.ceil(total / PAGE_SIZE) - 1;
+  const pages = await Promise.all(
+    Array.from({ length: Math.max(remainingPages, 0) }, (_, index) =>
+      fetchPage(hostId, fromDate, toDate, index + 1)
+    )
+  );
+  return [first, ...pages].flatMap((page) => page.payload ?? []);
+}
+
+function toClassItems(sessions: MomenceSession[]): ClassItem[] {
+  return sessions
+    .filter((session) => !session.isCancelled && session.sessionName && session.startsAt && session.endsAt)
+    .map((session) => {
+      const start = timeParts(session.startsAt);
+      const end = timeParts(session.endsAt);
+      return {
+        id: `momence-${session.id}`,
+        day: start.day,
+        space: spaceFor(session.location),
+        name: session.sessionName.trim(),
+        teachers: teachersFor(session),
+        start: start.minutes,
+        end: end.minutes,
+        timeLabel: `${formatTime(start.minutes)} – ${formatTime(end.minutes)}`,
+        note: "",
+        needsCover: false,
+        tag: tagForSession(session.sessionName),
+      } satisfies ClassItem;
+    });
+}
+
 /**
- * Daily Instagram downloads use only Momence's public schedule feed for
- * tomorrow. Weekly story posts continue to use the published Google Sheet so
- * they remain stable through the weekend.
+ * Every Instagram post (Daily, Weekly, Carousel, bulletin) is fed from this one
+ * source: Momence's live schedule for the current Monday–Sunday week (the same
+ * window the UI renders). Returns null when Momence is unreachable so callers
+ * can fall back to the published Google Sheet.
  */
-export async function getMomenceTomorrow(): Promise<ClassItem[] | null> {
+export async function getMomenceWeek(): Promise<ClassItem[] | null> {
   const hostId = process.env.MOMENCE_HOST_ID ?? "14607";
-  const { date: tomorrow } = tomorrowInTimeZone(TZ);
-  const fromDate = witaBoundary(tomorrow);
-  const dayAfterTomorrow = new Date(tomorrow);
-  dayAfterTomorrow.setUTCDate(dayAfterTomorrow.getUTCDate() + 1);
-  const toDate = witaBoundary(dayAfterTomorrow);
+  const week = datesForWeek(TZ);
+  const monday = week[DAYS[0]];
+  const dayAfterSunday = new Date(week[DAYS[DAYS.length - 1]]);
+  dayAfterSunday.setUTCDate(dayAfterSunday.getUTCDate() + 1);
+  const fromDate = witaBoundary(monday);
+  const toDate = witaBoundary(dayAfterSunday);
 
   try {
-    const first = await fetchPage(hostId, fromDate, toDate, 0);
-    const total = first.pagination?.totalCount ?? first.payload?.length ?? 0;
-    const remainingPages = Math.ceil(total / PAGE_SIZE) - 1;
-    const pages = await Promise.all(
-      Array.from({ length: Math.max(remainingPages, 0) }, (_, index) =>
-        fetchPage(hostId, fromDate, toDate, index + 1)
-      )
-    );
-    const sessions = [first, ...pages].flatMap((page) => page.payload ?? []);
-
-    const classes = sessions
-      .filter((session) => !session.isCancelled && session.sessionName && session.startsAt && session.endsAt)
-      .map((session) => {
-        const start = timeParts(session.startsAt);
-        const end = timeParts(session.endsAt);
-        return {
-          id: `momence-${session.id}`,
-          day: start.day,
-          space: spaceFor(session.location),
-          name: session.sessionName.trim(),
-          teachers: teachersFor(session),
-          start: start.minutes,
-          end: end.minutes,
-          timeLabel: `${formatTime(start.minutes)} – ${formatTime(end.minutes)}`,
-          note: "",
-          needsCover: false,
-          tag: tagForSession(session.sessionName),
-        } satisfies ClassItem;
-      });
-
+    const classes = toClassItems(await fetchSessions(hostId, fromDate, toDate));
     return classes.length ? classes : null;
   } catch {
     return null;

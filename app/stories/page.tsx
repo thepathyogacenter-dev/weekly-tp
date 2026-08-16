@@ -1,6 +1,5 @@
 import "./stories.css";
 import { StoriesClient } from "@/components/stories/StoriesClient";
-import { getMomenceTomorrow } from "@/lib/momence";
 import { getSchedule } from "@/lib/schedule";
 import { tomorrowInTimeZone } from "@/lib/stories";
 
@@ -12,16 +11,17 @@ export const metadata = {
 };
 
 export default async function StoriesPage() {
-  const [data, momenceClasses] = await Promise.all([getSchedule(), getMomenceTomorrow()]);
+  // Satu sumber untuk semua post: schedule (Momence + merge Sheet). Daily, Weekly,
+  // Carousel, dan bulletin semuanya dialiri lewat Schedule Editor di client.
+  const data = await getSchedule();
   const tomorrow = tomorrowInTimeZone("Asia/Makassar");
 
   return (
     <StoriesClient
       data={data}
-      dailyClasses={momenceClasses ?? []}
       dailyDay={tomorrow.day}
       dailyDate={tomorrow.date.toISOString()}
-      momenceAvailable={momenceClasses !== null}
+      momenceAvailable={data.source === "momence"}
     />
   );
 }

@@ -24,13 +24,11 @@ const TZ = "Asia/Makassar";
 
 export function StoriesClient({
   data,
-  dailyClasses,
   dailyDay,
   dailyDate,
   momenceAvailable,
 }: {
   data: SchedulePayload;
-  dailyClasses: ClassItem[];
   dailyDay: Day;
   dailyDate: string;
   momenceAvailable: boolean;
@@ -40,7 +38,12 @@ export function StoriesClient({
   const [scheduleLoaded, setScheduleLoaded] = useState(false);
 
   const week = useMemo(() => datesForWeek(TZ), []);
-  const { outdoor, indoor } = splitBySpace(dailyClasses);
+  // Semua post Instagram (termasuk Daily) ambil dari Schedule Editor (adminClasses),
+  // yang berbasis Momence + merge Sheet + override manual. Daily = kelas hari besok.
+  const { outdoor, indoor } = useMemo(
+    () => splitBySpace(classesForDay(adminClasses, dailyDay)),
+    [adminClasses, dailyDay]
+  );
   const dateLabel = formatDateLabel(new Date(dailyDate), TZ);
   const scheduleStorageKey = `the-path-admin-schedule-${week.MONDAY.toISOString().slice(0, 10)}`;
 

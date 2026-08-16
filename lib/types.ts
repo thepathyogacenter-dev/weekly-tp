@@ -37,6 +37,6 @@ export interface SchedulePayload {
   teacherPhotos: Record<string, string>;
   /** Optional background for the weekly social download, selected by Monday date. */
   weeklyBackgroundImage: string | null;
-  source: "sheet" | "fallback";
+  source: "momence" | "sheet" | "fallback";
   fetchedAt: string;
 }

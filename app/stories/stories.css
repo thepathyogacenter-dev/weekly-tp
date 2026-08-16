@@ -598,16 +598,16 @@
   line-height: 1;
 }
 .weekly-poster-time small { margin-top: 1px; font-size: 10px; line-height: 1; }
-.weekly-poster-class { min-width: 0; display: flex; flex-direction: column; }
+.weekly-poster-class { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .weekly-poster-class strong {
   font-family: var(--story-font);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   line-height: 1.05;
   gap: 4px;
   text-transform: uppercase;
 }
-.weekly-poster-class span { margin-top: 1px; font-size: 20px; font-weight: 400; line-height: 1; text-transform: uppercase; }
+.weekly-poster-class span { margin-top: 1px; font-size: 22px; font-weight: 400; line-height: 1; text-transform: uppercase; }
 .weekly-poster-tag,
 .weekly-poster-key b {
   display: inline-flex;
@@ -665,12 +665,12 @@
 .weekly-event-card-surface { min-height: 332px; padding: 18px; box-sizing: border-box; border: 1px solid rgba(255,255,255,.2); border-radius: 20px; background: rgba(255,255,255,.10); backdrop-filter: blur(12px); }
 .weekly-event-card-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
 .weekly-event-card-meta span:first-child { padding: 6px 10px; border-radius: 99px; background: rgba(255,255,255,.1); font-size: 9px; font-weight: 500; letter-spacing: 3px; }
-.weekly-event-card-meta span:last-child { overflow: hidden; font-size: 14px; font-weight: 400; text-overflow: ellipsis; white-space: nowrap; text-transform: uppercase; }
-.weekly-event-card-surface img { width: 100%; height: 190px; border-radius: 13px; object-fit: cover; }
+.weekly-event-card-meta span:last-child { overflow: hidden; font-size: 16px; font-weight: 400; text-overflow: ellipsis; white-space: nowrap; text-transform: uppercase; }
+.weekly-event-card-surface img { width: 100%; height: 275px; border-radius: 13px; object-fit: cover; }
 .weekly-event-card-time { display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px; }
-.weekly-event-card-time strong { font-size: 14px; }
-.weekly-event-card-time span { font-size: 11px; opacity: .7; }
-.weekly-event-card-surface h2 { margin: 9px 0 0; font-size: 16px; font-weight: 800; line-height: 1.08; text-transform: uppercase; }
+.weekly-event-card-time strong { font-size: 16px; }
+.weekly-event-card-time span { font-size: 14px; opacity: .7; }
+.weekly-event-card-surface h2 { margin: 9px 0 0; font-size: 18px; font-weight: 800; line-height: 1.08; text-transform: uppercase; }
 .weekly-events-empty { margin: 80px 0 0; font-size: 22px; text-align: center; }
 
 /* ---- Weekly teacher WhatsApp bulletin ---- */
