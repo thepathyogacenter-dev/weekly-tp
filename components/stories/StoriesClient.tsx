@@ -254,6 +254,7 @@ export function StoriesClient({
           <div className="stories-grid">
             <div>
               <p className="stories-panel-label">Outdoor Shala</p>
+              <button type="button" className="story-edit-link" onClick={() => setTab("schedule")}>Edit schedule</button>
               <StoryCanvas filename={`tomorrow-${dailyDay.toLowerCase()}-outdoor-shala.png`} label="Outdoor Shala">
                 <DailyStoryTemplate
                   day={dailyDay}
@@ -267,6 +268,7 @@ export function StoriesClient({
 
             <div>
               <p className="stories-panel-label">Indoor Shala</p>
+              <button type="button" className="story-edit-link" onClick={() => setTab("schedule")}>Edit schedule</button>
               <StoryCanvas filename={`tomorrow-${dailyDay.toLowerCase()}-indoor-shala.png`} label="Indoor Shala">
                 <DailyStoryTemplate
                   day={dailyDay}

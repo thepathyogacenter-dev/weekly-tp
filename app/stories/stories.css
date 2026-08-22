@@ -157,6 +157,8 @@
   margin: 0 0 12px;
   text-align: center;
 }
+.story-edit-link { display: block; margin: -5px auto 12px; border: 1px solid var(--hair); border-radius: 3px; padding: 5px 8px; background: transparent; color: var(--ink); font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+.story-edit-link:hover { border-color: var(--rust); color: var(--rust); }
 
 /* ---- Teacher calendars page ---- */
 .cal-intro {
