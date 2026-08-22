@@ -691,6 +691,9 @@
 .weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-card-surface img { border-radius: 10px; }
 .weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-card-surface img { aspect-ratio: 4 / 3; }
 .weekly-events-poster[data-event-count="9"] .weekly-events-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* The three-by-three fallback gets taller imagery so it does not look overly compressed. */
+.weekly-events-poster[data-event-count="9"] .weekly-event-card-surface { min-height: 342px; }
+.weekly-events-poster[data-event-count="9"] .weekly-event-card-surface img { aspect-ratio: 1 / 1.1; }
 .weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-card-time { margin-top: 8px; }
 .weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-card-time strong { font-size: 13px; }
 .weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-card-time span { font-size: 11px; }
