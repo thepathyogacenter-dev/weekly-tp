@@ -835,3 +835,42 @@
 .story-canvas-editable[contenteditable="true"] { outline: 1.5px dashed rgba(255,255,255,.85); outline-offset: 4px; border-radius: 3px; cursor: text; }
 .weekly-event-image-editable { cursor: ns-resize; touch-action: none; outline: 2px dashed rgba(255,255,255,.88); outline-offset: 3px; }
 .weekly-events-admin .story-edit-link { margin-top: 14px; }
+
+/* ---- Responsive admin layout ---- */
+@media (max-width: 760px) {
+  .stories-shell { padding-bottom: 56px; }
+  .stories-head { margin-bottom: 20px; }
+  .stories-head-actions { flex-wrap: wrap; gap: 10px 14px; margin-top: 14px; }
+  .stories-tabs { flex-wrap: wrap; margin: 18px 0 26px; }
+  .stories-tab { flex: 1 1 150px; min-height: 42px; padding: 9px 12px; }
+  .stories-grid { gap: 32px; }
+  .weekly-events-admin { margin-bottom: 30px; padding: 18px; }
+  .weekly-events-upload-list { grid-template-columns: 1fr; }
+  .story-library-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .admin-edit-actions { grid-template-columns: 1fr 1fr; }
+  .admin-edit-actions .admin-delete { grid-column: 1 / -1; }
+}
+
+@media (max-width: 520px) {
+  .stories-shell { padding: 24px 16px 48px; }
+  .stories-title { font-size: clamp(30px, 12vw, 46px); }
+  .stories-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+  .stories-tab { min-width: 0; padding: 10px 7px; font-size: 10px; letter-spacing: .06em; }
+  .stories-tab:nth-child(3), .stories-tab:nth-child(4), .stories-tab:nth-child(5) { grid-column: 1 / -1; }
+  .daily-edit-head { align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .daily-edit-head .stories-panel-label { max-width: 58%; text-align: left; }
+  .weekly-events-admin { padding: 16px; }
+  .weekly-events-admin h2 { font-size: 25px; }
+  .weekly-events-admin p:not(.stories-panel-label) { font-size: 14px; }
+  .weekly-events-upload { padding: 10px; }
+  .story-actions { width: 100%; }
+  .story-download, .story-share { flex: 1 1 0; min-width: 0; padding: 11px 8px; font-size: 10px; }
+  .story-library-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .story-library-card h3 { min-height: 48px; padding: 9px 9px 7px; font-size: 11px; }
+  .story-library-card > div { gap: 5px; padding: 0 9px 9px; }
+  .story-library-card a, .story-library-card button { min-height: 32px; font-size: 8px; letter-spacing: .04em; }
+  .admin-edit-backdrop { align-items: end; padding: 0; }
+  .admin-edit-form { width: 100%; max-height: 94dvh; overflow-y: auto; border-radius: 8px 8px 0 0; padding: 20px 16px calc(20px + env(safe-area-inset-bottom)); }
+  .admin-edit-row { grid-template-columns: 1fr; gap: 10px; }
+  .admin-schedule-grid { grid-template-columns: repeat(7, minmax(225px, 1fr)); margin-right: -16px; padding-right: 16px; }
+}

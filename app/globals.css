@@ -562,3 +562,27 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---- Compact phone layout ---- */
+@media (max-width: 520px) {
+  .shell { padding: 24px 16px 56px; }
+  .portal-intro { min-height: 100svh; padding: 28px 20px; }
+  .portal-intro-head { margin-bottom: 30px; }
+  .portal-intro-head h1 { font-size: clamp(48px, 16vw, 72px); }
+  .portal-choice { min-height: 205px; padding: 24px; }
+  .wordmark { font-size: clamp(40px, 14vw, 64px); }
+  .week-range { font-size: 10px; letter-spacing: .14em; }
+  .filters { padding-top: 14px; }
+  .filter-row--dropdowns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filter-row--dropdowns .filter-item:nth-child(3) { grid-column: 1 / -1; }
+  .filter-row--dropdowns .filter-item:nth-child(2) .dropdown-panel { left: auto; right: 0; transform: none; }
+  .filter-row--dropdowns .filter-item:nth-child(3) .dropdown-panel { left: 0; right: auto; }
+  .search { flex-basis: 100%; max-width: none; min-height: 38px; }
+  .filter-meta { font-size: 10px; }
+  .entry { grid-template-columns: 52px minmax(0, 1fr); gap: 10px; }
+  .rail { padding-right: 9px; font-size: 11px; }
+  .entry-body { gap: 9px; }
+  .avatar { width: 34px; height: 34px; flex-basis: 34px; font-size: 10px; }
+  .class-name { font-size: 14px; }
+  .class-meta { font-size: 9.5px; letter-spacing: .07em; }
+}
