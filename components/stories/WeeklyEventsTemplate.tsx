@@ -130,7 +130,6 @@ export function WeeklyEventsTemplate({
           </article>
         ))}
       </div>
-      <div className="weekly-events-link-sticker-space" aria-hidden="true">Add link sticker here</div>
       {events.length === 0 && <p className="weekly-events-empty">No workshops or events scheduled this week.</p>}
     </section>
   );
