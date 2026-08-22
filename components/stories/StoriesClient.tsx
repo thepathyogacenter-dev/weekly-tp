@@ -19,6 +19,7 @@ import { WeeklyEventsTemplate } from "./WeeklyEventsTemplate";
 import { AdminScheduleEditor } from "./AdminScheduleEditor";
 import { CarouselCoverTemplate, CarouselEventTemplate } from "./CarouselTemplates";
 import { CarouselDownloadButton } from "./CarouselDownloadButton";
+import { StoryLibrary } from "./StoryLibrary";
 
 const TZ = "Asia/Makassar";
 
@@ -33,7 +34,7 @@ export function StoriesClient({
   dailyDate: string;
   momenceAvailable: boolean;
 }) {
-  const [tab, setTab] = useState<"daily" | "weekly" | "carousel" | "schedule">("daily");
+  const [tab, setTab] = useState<"daily" | "weekly" | "carousel" | "schedule" | "library">("daily");
   const [adminClasses, setAdminClasses] = useState<ClassItem[]>(data.classes);
   const [syncState, setSyncState] = useState<"saved" | "saving" | "error">("saved");
   const [dailyEditing, setDailyEditing] = useState(false);
@@ -190,10 +191,20 @@ export function StoriesClient({
         >
           Schedule editor
         </button>
+        <button
+          type="button"
+          className="stories-tab"
+          data-active={tab === "library"}
+          onClick={() => setTab("library")}
+        >
+          Story library
+        </button>
       </div>
 
       {tab === "schedule" ? (
         <AdminScheduleEditor classes={adminClasses} onChange={applyChange} onReset={resetAdminClasses} syncState={syncState} />
+      ) : tab === "library" ? (
+        <StoryLibrary />
       ) : tab === "carousel" ? (
         <>
           <section className="weekly-events-admin" aria-labelledby="carousel-admin-title">

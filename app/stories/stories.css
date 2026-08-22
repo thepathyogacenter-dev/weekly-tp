@@ -814,3 +814,19 @@
   letter-spacing: .02em;
   text-transform: uppercase;
 }
+
+
+/* ---- Reusable story library ---- */
+.story-library { margin-top: 34px; }
+.story-library > header { max-width: 680px; margin-bottom: 26px; }
+.story-library .stories-panel-label { text-align: left; }
+.story-library h2 { margin: 0; font-size: clamp(30px, 4vw, 48px); line-height: .95; text-transform: uppercase; }
+.story-library > header p:last-child { margin: 12px 0 0; line-height: 1.45; }
+.story-library-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 18px; }
+.story-library-card { overflow: hidden; border: 1px solid var(--hair); border-radius: 5px; background: var(--paper); }
+.story-library-card img { display: block; width: 100%; aspect-ratio: 9 / 16; object-fit: cover; background: var(--ink); }
+.story-library-card h3 { min-height: 38px; margin: 0; padding: 12px 12px 8px; font-size: 13px; line-height: 1.18; text-transform: uppercase; }
+.story-library-card > div { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 0 12px 12px; }
+.story-library-card a, .story-library-card button { display: grid; place-items: center; min-height: 34px; border: 1px solid var(--ink); border-radius: 3px; background: transparent; color: var(--ink); font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .08em; text-decoration: none; text-transform: uppercase; cursor: pointer; }
+.story-library-card button { background: var(--ink); color: var(--paper); }
+.story-library-card button:disabled { opacity: .6; cursor: wait; }
