@@ -1,3 +1,5 @@
+"use client";
+
 import type { ClassItem, Day } from "@/lib/types";
 
 function dateLabel(day: Day, week: Record<Day, Date>) {
@@ -36,11 +38,23 @@ export function WeeklyEventsTemplate({
   week,
   backgroundImageUrl,
   eventImages,
+  editable = false,
+  eventImagePositions = {},
+  onEventImagePositionChange,
+  onEventChange,
+  headerTitle = "This week at The Path",
+  onHeaderTitleChange,
 }: {
   events: ClassItem[];
   week: Record<Day, Date>;
   backgroundImageUrl: string | null;
   eventImages: Record<string, string>;
+  editable?: boolean;
+  eventImagePositions?: Record<string, number>;
+  onEventImagePositionChange?: (eventId: string, position: number) => void;
+  onEventChange?: (eventId: string, patch: { name?: string; teachers?: string[]; tag?: ClassItem["tag"] }) => void;
+  headerTitle?: string;
+  onHeaderTitleChange?: (title: string) => void;
 }) {
   return (
     <section className="weekly-events-poster" data-event-count={events.length}>
@@ -49,7 +63,12 @@ export function WeeklyEventsTemplate({
       <header className="weekly-events-header">
         <img src="/stories/weekly-schedule-logo.png" alt="The Path" />
         <div>
-          <h1>This week at The Path</h1>
+          <h1
+            contentEditable={editable}
+            suppressContentEditableWarning
+            className={editable ? "story-canvas-editable" : undefined}
+            onBlur={(event) => onHeaderTitleChange?.(event.currentTarget.textContent?.trim() || "This week at The Path")}
+          >{headerTitle}</h1>
           <p>{weekLabel(week)}</p>
         </div>
       </header>
@@ -60,15 +79,53 @@ export function WeeklyEventsTemplate({
             <p className="weekly-event-date"><span>{dateLabel(event.day, week).day}</span><strong>{dateLabel(event.day, week).date}</strong></p>
             <div className="weekly-event-card-surface">
               <div className="weekly-event-card-meta">
-                <span>{event.tag}</span>
-                <span>{teacherName(event.teachers)}</span>
+                <span
+                  contentEditable={editable}
+                  suppressContentEditableWarning
+                  className={editable ? "story-canvas-editable" : undefined}
+                  onBlur={(target) => onEventChange?.(event.id, { tag: (target.currentTarget.textContent?.trim().toUpperCase() || null) as ClassItem["tag"] })}
+                >{event.tag}</span>
+                <span
+                  contentEditable={editable}
+                  suppressContentEditableWarning
+                  className={editable ? "story-canvas-editable" : undefined}
+                  onBlur={(target) => onEventChange?.(event.id, { teachers: (target.currentTarget.textContent || "").split(/[,·]/).map((teacher) => teacher.trim()).filter(Boolean) })}
+                >{teacherName(event.teachers)}</span>
               </div>
-              <img src={eventImages[event.id] ?? "/stories/weekly-schedule-photo.png"} alt="" />
+              <img
+                className={editable ? "weekly-event-image-editable" : undefined}
+                src={eventImages[event.id] ?? "/stories/weekly-schedule-photo.png"}
+                alt=""
+                style={{ objectPosition: `50% ${eventImagePositions[event.id] ?? 50}%` }}
+                onPointerDown={editable ? (pointerEvent) => {
+                  const image = pointerEvent.currentTarget;
+                  const startY = pointerEvent.clientY;
+                  const startPosition = eventImagePositions[event.id] ?? 50;
+                  image.setPointerCapture(pointerEvent.pointerId);
+                  const onMove = (moveEvent: PointerEvent) => {
+                    const nextPosition = Math.max(0, Math.min(100, startPosition - (moveEvent.clientY - startY) * 0.35));
+                    onEventImagePositionChange?.(event.id, nextPosition);
+                  };
+                  const onEnd = () => {
+                    image.removeEventListener("pointermove", onMove);
+                    image.removeEventListener("pointerup", onEnd);
+                    image.removeEventListener("pointercancel", onEnd);
+                  };
+                  image.addEventListener("pointermove", onMove);
+                  image.addEventListener("pointerup", onEnd);
+                  image.addEventListener("pointercancel", onEnd);
+                } : undefined}
+              />
               <div className="weekly-event-card-time">
                 <strong>{eventTime(event)}</strong>
                 {duration(event) && <span>{duration(event)}</span>}
               </div>
-              <h2>{event.name}</h2>
+              <h2
+                contentEditable={editable}
+                suppressContentEditableWarning
+                className={editable ? "story-canvas-editable" : undefined}
+                onBlur={(target) => onEventChange?.(event.id, { name: target.currentTarget.textContent?.trim() || event.name })}
+              >{event.name}</h2>
             </div>
           </article>
         ))}

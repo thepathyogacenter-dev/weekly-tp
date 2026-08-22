@@ -38,6 +38,8 @@ export function StoriesClient({
   const [adminClasses, setAdminClasses] = useState<ClassItem[]>(data.classes);
   const [syncState, setSyncState] = useState<"saved" | "saving" | "error">("saved");
   const [dailyEditing, setDailyEditing] = useState(false);
+  const [weeklyEventsEditing, setWeeklyEventsEditing] = useState(false);
+  const [weeklyEventsTitle, setWeeklyEventsTitle] = useState("This week at The Path");
 
   const week = useMemo(() => datesForWeek(TZ), []);
   // Semua post Instagram (termasuk Daily) ambil dari Schedule Editor (adminClasses),
@@ -71,6 +73,9 @@ export function StoriesClient({
   );
   const storageKey = `the-path-weekly-event-images-${week.MONDAY.toISOString().slice(0, 10)}`;
   const [eventImages, setEventImages] = useState<Record<string, string>>({});
+  const [eventImagePositions, setEventImagePositions] = useState<Record<string, number>>({});
+  const eventPositionsKey = `${storageKey}-positions`;
+  const eventTitleKey = `${storageKey}-title`;
 
   useEffect(() => {
     lastSharedClasses.current = data.classes;
@@ -122,18 +127,28 @@ export function StoriesClient({
     try {
       const saved = window.localStorage.getItem(storageKey);
       if (saved) setEventImages(JSON.parse(saved));
+      const savedPositions = window.localStorage.getItem(eventPositionsKey);
+      if (savedPositions) setEventImagePositions(JSON.parse(savedPositions));
+      const savedTitle = window.localStorage.getItem(eventTitleKey);
+      if (savedTitle) setWeeklyEventsTitle(savedTitle);
     } catch {
       setEventImages({});
     }
-  }, [storageKey]);
+  }, [storageKey, eventPositionsKey, eventTitleKey]);
 
   useEffect(() => {
     try {
       window.localStorage.setItem(storageKey, JSON.stringify(eventImages));
+      window.localStorage.setItem(eventPositionsKey, JSON.stringify(eventImagePositions));
+      window.localStorage.setItem(eventTitleKey, weeklyEventsTitle);
     } catch {
       // Image selections are still available until the current page is closed.
     }
-  }, [eventImages, storageKey]);
+  }, [eventImages, eventImagePositions, weeklyEventsTitle, storageKey, eventPositionsKey, eventTitleKey]);
+
+  const updateWeeklyEvent = (id: string, patch: { name?: string; teachers?: string[]; tag?: ClassItem["tag"] }) => {
+    applyChange(adminClasses.map((classItem) => classItem.id === id ? { ...classItem, ...patch } : classItem));
+  };
 
   const uploadEventImage = (eventId: string, file: File | undefined) => {
     if (!file) return;
@@ -309,7 +324,8 @@ export function StoriesClient({
             <div>
               <p className="stories-panel-label">New weekly story</p>
               <h2 id="weekly-events-admin-title">Events & workshops</h2>
-              <p>Upload a photo for each card. The same image is automatically shared with its Weekly Posts Carousel post.</p>
+              <p>Click <strong>Edit in canvas</strong> to edit the poster text or drag an image vertically to choose its crop. Image uploads are also shared with the Weekly Posts Carousel.</p>
+              <button type="button" className="story-edit-link" onClick={() => setWeeklyEventsEditing((editing) => !editing)}>{weeklyEventsEditing ? "Done editing" : "Edit in canvas"}</button>
             </div>
             <div className="weekly-events-upload-list">
               {weeklyEvents.map((event) => (
@@ -332,6 +348,12 @@ export function StoriesClient({
                   week={week}
                   backgroundImageUrl={data.weeklyBackgroundImage}
                   eventImages={eventImages}
+                  editable={weeklyEventsEditing}
+                  eventImagePositions={eventImagePositions}
+                  onEventImagePositionChange={(id, position) => setEventImagePositions((current) => ({ ...current, [id]: position }))}
+                  onEventChange={updateWeeklyEvent}
+                  headerTitle={weeklyEventsTitle}
+                  onHeaderTitleChange={setWeeklyEventsTitle}
                 />
               </StoryCanvas>
             </div>
