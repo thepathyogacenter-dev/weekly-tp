@@ -675,24 +675,26 @@
 .weekly-events-empty { margin: 80px 0 0; font-size: 22px; text-align: center; }
 .weekly-events-link-sticker-space { position: absolute; z-index: 1; bottom: 72px; left: 50%; display: grid; place-items: center; width: 490px; height: 106px; box-sizing: border-box; border: 2px dashed rgba(255,255,255,.58); border-radius: 999px; background: rgba(0,0,0,.08); color: rgba(255,255,255,.9); font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; transform: translateX(-50%); }
 /* Eight cards need two compact rows while keeping the bottom safe zone free for Instagram's native link sticker. */
-.weekly-events-poster[data-event-count="8"] { padding: 42px 42px 252px; }
-.weekly-events-poster[data-event-count="8"] .weekly-events-header { grid-template-columns: 108px 1fr; gap: 18px; margin-bottom: 28px; }
-.weekly-events-poster[data-event-count="8"] .weekly-events-header img { width: 108px; height: 124px; }
-.weekly-events-poster[data-event-count="8"] .weekly-events-header h1 { font-size: 44px; }
-.weekly-events-poster[data-event-count="8"] .weekly-events-header p { margin-top: 9px; padding: 7px 15px; font-size: 12px; letter-spacing: 3px; }
-.weekly-events-poster[data-event-count="8"] .weekly-events-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
-.weekly-events-poster[data-event-count="8"] .weekly-event-date { min-height: 38px; gap: 4px; margin-bottom: 8px; padding-bottom: 8px; }
-.weekly-events-poster[data-event-count="8"] .weekly-event-date span { font-size: 10px; letter-spacing: 3px; }
-.weekly-events-poster[data-event-count="8"] .weekly-event-date strong { font-size: 14px; }
-.weekly-events-poster[data-event-count="8"] .weekly-event-card-surface { min-height: 280px; padding: 13px; border-radius: 15px; }
-.weekly-events-poster[data-event-count="8"] .weekly-event-card-meta { margin-bottom: 8px; }
-.weekly-events-poster[data-event-count="8"] .weekly-event-card-meta span:first-child { padding: 5px 7px; font-size: 8px; letter-spacing: 2px; }
-.weekly-events-poster[data-event-count="8"] .weekly-event-card-meta span:last-child { font-size: 12px; }
-.weekly-events-poster[data-event-count="8"] .weekly-event-card-surface img { border-radius: 10px; }
-.weekly-events-poster[data-event-count="8"] .weekly-event-card-time { margin-top: 8px; }
-.weekly-events-poster[data-event-count="8"] .weekly-event-card-time strong { font-size: 13px; }
-.weekly-events-poster[data-event-count="8"] .weekly-event-card-time span { font-size: 11px; }
-.weekly-events-poster[data-event-count="8"] .weekly-event-card-surface h2 { margin-top: 6px; font-size: 14px; line-height: 1.06; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) { padding: 42px 42px 252px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-events-header { grid-template-columns: 108px 1fr; gap: 18px; margin-bottom: 28px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-events-header img { width: 108px; height: 124px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-events-header h1 { font-size: 44px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-events-header p { margin-top: 9px; padding: 7px 15px; font-size: 12px; letter-spacing: 3px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-events-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-date { min-height: 38px; gap: 4px; margin-bottom: 8px; padding-bottom: 8px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-date span { font-size: 10px; letter-spacing: 3px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-date strong { font-size: 14px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-card-surface { min-height: 280px; padding: 13px; border-radius: 15px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-card-meta { margin-bottom: 8px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-card-meta span:first-child { padding: 5px 7px; font-size: 8px; letter-spacing: 2px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-card-meta span:last-child { font-size: 12px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-card-surface img { border-radius: 10px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-card-surface img { aspect-ratio: 4 / 3; }
+.weekly-events-poster[data-event-count="9"] .weekly-events-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-card-time { margin-top: 8px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-card-time strong { font-size: 13px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-card-time span { font-size: 11px; }
+.weekly-events-poster:is([data-event-count="8"], [data-event-count="9"]) .weekly-event-card-surface h2 { margin-top: 6px; font-size: 14px; line-height: 1.06; }
 
 /* ---- Weekly teacher WhatsApp bulletin ---- */
 .teacher-weekly-poster {
