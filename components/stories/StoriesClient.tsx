@@ -36,6 +36,7 @@ export function StoriesClient({
   const [tab, setTab] = useState<"daily" | "weekly" | "carousel" | "schedule">("daily");
   const [adminClasses, setAdminClasses] = useState<ClassItem[]>(data.classes);
   const [syncState, setSyncState] = useState<"saved" | "saving" | "error">("saved");
+  const [dailyEditing, setDailyEditing] = useState(false);
 
   const week = useMemo(() => datesForWeek(TZ), []);
   // Semua post Instagram (termasuk Daily) ambil dari Schedule Editor (adminClasses),
@@ -105,13 +106,15 @@ export function StoriesClient({
       const response = await fetch(`/api/admin/schedule?week=${weekKey}`, { method: "DELETE" });
       const result = await response.json().catch(() => null);
       if (!response.ok || !result?.ok) throw new Error("Shared schedule reset failed");
-      lastSharedClasses.current = data.classes;
-      setAdminClasses(data.classes);
-      setSyncState("saved");
+      window.location.reload();
     } catch {
       setAdminClasses(lastSharedClasses.current);
       setSyncState("error");
     }
+  };
+
+  const updateDailyClass = (id: string, patch: { name?: string; teachers?: string[]; timeLabel?: string }) => {
+    applyChange(adminClasses.map((classItem) => classItem.id === id ? { ...classItem, ...patch } : classItem));
   };
 
   useEffect(() => {
@@ -243,7 +246,11 @@ export function StoriesClient({
         </>
       ) : tab === "daily" ? (
         <>
-          <p className="stories-panel-label">Tomorrow · {titleCase(dailyDay)}</p>
+          <div className="daily-edit-head">
+            <p className="stories-panel-label">Tomorrow · {titleCase(dailyDay)}</p>
+            <button type="button" className="story-edit-link" onClick={() => setDailyEditing((editing) => !editing)}>{dailyEditing ? "Done editing" : "Edit in canvas"}</button>
+          </div>
+          {dailyEditing && <p className="stories-source-note" role="status">Click a class name, teacher, or time in the story, then click outside the text to save it for everyone.</p>}
 
           {!momenceAvailable && (
             <p className="stories-source-note" role="status">
@@ -262,6 +269,8 @@ export function StoriesClient({
                   shalaLabel="Outdoor Shala"
                   classes={outdoor}
                   bgSrc="/stories/outdoor-shala.jpg"
+                  editable={dailyEditing}
+                  onClassChange={updateDailyClass}
                 />
               </StoryCanvas>
             </div>
@@ -276,6 +285,8 @@ export function StoriesClient({
                   shalaLabel="Indoor Shala"
                   classes={indoor}
                   bgSrc="/stories/indoor-shala.jpg"
+                  editable={dailyEditing}
+                  onClassChange={updateDailyClass}
                 />
               </StoryCanvas>
             </div>

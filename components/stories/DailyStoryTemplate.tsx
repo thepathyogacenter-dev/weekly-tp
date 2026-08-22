@@ -13,12 +13,16 @@ export function DailyStoryTemplate({
   shalaLabel,
   classes,
   bgSrc,
+  editable = false,
+  onClassChange,
 }: {
   day: string;
   dateLabel: string;
   shalaLabel: string;
   classes: ClassItem[];
   bgSrc: string;
+  editable?: boolean;
+  onClassChange?: (id: string, patch: { name?: string; teachers?: string[]; timeLabel?: string }) => void;
 }) {
   const periods = groupByPeriod(classes);
   const entries = (["AM", "NOON", "PM"] as const).filter((p) => periods[p].length > 0);
@@ -72,7 +76,12 @@ export function DailyStoryTemplate({
                         <div className="story-entry" key={c.id}>
                           <div className="story-entry-top">
                             <div className="story-entry-title-line">
-                              <div className="story-entry-name">{c.name}</div>
+                              <div
+                                className="story-entry-name"
+                                contentEditable={editable}
+                                suppressContentEditableWarning
+                                onBlur={(event) => onClassChange?.(c.id, { name: event.currentTarget.textContent?.trim() || c.name })}
+                              >{c.name}</div>
                               {c.tag && (
                                 <div className="story-tag-badge" title={c.tag}>
                                   <span>{c.tag === "EVENT" ? "E" : "W"}</span>
@@ -81,11 +90,11 @@ export function DailyStoryTemplate({
                             </div>
                           </div>
                         <div className="story-entry-meta">
-                          {storyTimeRange(c) && <span>[ {storyTimeRange(c)} ]</span>}
+                          {storyTimeRange(c) && <span className="story-inline-edit" contentEditable={editable} suppressContentEditableWarning onBlur={(event) => onClassChange?.(c.id, { timeLabel: event.currentTarget.textContent?.replace(/[\[\]]/g, "").trim() || c.timeLabel })}>[ {storyTimeRange(c)} ]</span>}
                           {c.teachers.length > 0 && (
                             <>
                               <span>·</span>
-                              <span>{firstNames(c.teachers)}</span>
+                              <span className="story-inline-edit" contentEditable={editable} suppressContentEditableWarning onBlur={(event) => onClassChange?.(c.id, { teachers: (event.currentTarget.textContent ?? "").split(",").map((teacher) => teacher.trim()).filter(Boolean) })}>{firstNames(c.teachers)}</span>
                             </>
                           )}
                         </div>

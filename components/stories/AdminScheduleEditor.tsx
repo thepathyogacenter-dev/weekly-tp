@@ -71,7 +71,7 @@ export function AdminScheduleEditor({ classes, onChange, onReset, syncState }: E
           <p>Make a cover change, edit a class, or add a one-off class. Saved changes update the shared schedule for everyone using the portal link; your Google Sheet is unchanged.</p>
           <p className="stories-source-note" role="status">{syncState === "saving" ? "Saving shared schedule…" : syncState === "error" ? "Could not save the shared schedule. Your change was not published." : "Shared schedule is up to date."}</p>
         </div>
-        <button className="admin-reset" type="button" onClick={onReset}>Reset to sheet</button>
+        <button className="admin-reset" type="button" onClick={onReset}>Restore Momence schedule</button>
       </div>
 
       <div className="admin-schedule-grid">

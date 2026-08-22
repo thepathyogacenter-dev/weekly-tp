@@ -159,6 +159,11 @@
 }
 .story-edit-link { display: block; margin: -5px auto 12px; border: 1px solid var(--hair); border-radius: 3px; padding: 5px 8px; background: transparent; color: var(--ink); font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
 .story-edit-link:hover { border-color: var(--rust); color: var(--rust); }
+.daily-edit-head { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.daily-edit-head .stories-panel-label { margin-bottom: 12px; }
+.daily-edit-head .story-edit-link { margin: -5px 0 12px; }
+.story-entry-name[contenteditable="true"], .story-inline-edit[contenteditable="true"] { cursor: text; outline: 1px dashed rgba(255,255,255,.82); outline-offset: 3px; border-radius: 2px; }
+.story-entry-name[contenteditable="true"]:focus, .story-inline-edit[contenteditable="true"]:focus { background: rgba(0,0,0,.22); outline-color: #fff; }
 
 /* ---- Teacher calendars page ---- */
 .cal-intro {
