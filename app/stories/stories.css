@@ -673,8 +673,8 @@
 .weekly-event-card-surface { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 332px; padding: 18px; box-sizing: border-box; border: 1px solid rgba(255,255,255,.2); border-radius: 20px; background: rgba(255,255,255,.10); backdrop-filter: blur(12px); }
 .weekly-event-card-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
 .weekly-event-card-meta span:first-child { padding: 6px 10px; border-radius: 99px; background: rgba(255,255,255,.1); font-size: 9px; font-weight: 500; letter-spacing: 3px; }
-.weekly-event-card-meta span:last-child { overflow: hidden; font-size: 16px; font-weight: 400; text-overflow: ellipsis; white-space: nowrap; text-transform: uppercase; }
-.weekly-event-card-surface img { flex: 0 0 auto; width: 100%; aspect-ratio: 6 / 5; height: auto; border-radius: 13px; object-fit: cover; }
+.weekly-event-card-meta span:last-child { overflow: hidden; font-size: 16px; font-weight: 6000; text-overflow: ellipsis; white-space: nowrap; text-transform: uppercase; }
+.weekly-event-card-surface img { flex: 0 0 auto; width: 100%; aspect-ratio: 5 / 5; height: auto; border-radius: 13px; object-fit: cover; }
 .weekly-event-card-time { display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px; }
 .weekly-event-card-time strong { font-size: 16px; }
 .weekly-event-card-time span { font-size: 14px; opacity: .7; }
