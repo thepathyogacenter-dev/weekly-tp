@@ -8,6 +8,7 @@ type EditorProps = {
   classes: ClassItem[];
   onChange: (classes: ClassItem[]) => void;
   onReset: () => void;
+  syncState: "saved" | "saving" | "error";
 };
 
 function minutesFromTime(value: string | undefined) {
@@ -37,7 +38,7 @@ function newClass(day: Day): ClassItem {
   };
 }
 
-export function AdminScheduleEditor({ classes, onChange, onReset }: EditorProps) {
+export function AdminScheduleEditor({ classes, onChange, onReset, syncState }: EditorProps) {
   const [editing, setEditing] = useState<ClassItem | null>(null);
 
   const save = () => {
@@ -67,7 +68,8 @@ export function AdminScheduleEditor({ classes, onChange, onReset }: EditorProps)
         <div>
           <p className="stories-panel-label">Admin only</p>
           <h2 id="admin-schedule-title">Weekly schedule</h2>
-          <p>Make a cover change, edit a class, or add a one-off class. These overrides update the admin downloads and stay in this browser only; your Google Sheet is unchanged.</p>
+          <p>Make a cover change, edit a class, or add a one-off class. Saved changes update the shared schedule for everyone using the portal link; your Google Sheet is unchanged.</p>
+          <p className="stories-source-note" role="status">{syncState === "saving" ? "Saving shared schedule…" : syncState === "error" ? "Could not save the shared schedule. Your change was not published." : "Shared schedule is up to date."}</p>
         </div>
         <button className="admin-reset" type="button" onClick={onReset}>Reset to sheet</button>
       </div>

@@ -2,6 +2,7 @@ import { parseCsv } from "./csv";
 import { buildSchedule } from "./parse";
 import { fetchMonthlyWeek, fetchWeeklyBackgroundImage } from "./monthSchedule";
 import { getMomenceWeek } from "./momence";
+import { readOverrides } from "./scheduleStore";
 import { datesForWeek } from "./stories";
 import { FALLBACK_ROWS, TEACHER_PHOTOS } from "./fallback";
 import type { ClassItem, SchedulePayload } from "./types";
@@ -94,15 +95,18 @@ export async function getSchedule(): Promise<SchedulePayload> {
   // Kalau Momence tidak bisa diakses, pakai Sheet penuh; kalau dua-duanya gagal, snapshot.
   // Minggu yang diambil = Senin–Minggu, sama dengan yang dipakai UI.
   const week = datesForWeek(TZ);
+  const weekKey = week.MONDAY.toISOString().slice(0, 10);
   const momencePromise = getMomenceWeek();
   const sheetClassesPromise = apiKey && sheetId ? fetchMonthlyWeek(apiKey, sheetId, week) : Promise.resolve(null);
+  const sharedOverridesPromise = readOverrides(weekKey);
   const weeklyImagePromise = apiKey && sheetId
     ? fetchWeeklyBackgroundImage(apiKey, sheetId, week.MONDAY)
     : Promise.resolve(null);
   const photosPromise = teachersUrl ? fetchTeacherPhotos(teachersUrl) : Promise.resolve({});
-  const [momenceClasses, sheetClasses, sheetPhotos, weeklyBackgroundImage] = await Promise.all([
+  const [momenceClasses, sheetClasses, sharedOverrides, sheetPhotos, weeklyBackgroundImage] = await Promise.all([
     momencePromise,
     sheetClassesPromise,
+    sharedOverridesPromise,
     photosPromise,
     weeklyImagePromise,
   ]);
@@ -121,7 +125,7 @@ export async function getSchedule(): Promise<SchedulePayload> {
   }
 
   return {
-    classes: classes ?? buildSchedule(FALLBACK_ROWS),
+    classes: sharedOverrides?.length ? sharedOverrides : classes ?? buildSchedule(FALLBACK_ROWS),
     teacherPhotos: {
       ...TEACHER_PHOTOS,
       ...sheetPhotos,
