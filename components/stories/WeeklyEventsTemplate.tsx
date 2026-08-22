@@ -43,7 +43,7 @@ export function WeeklyEventsTemplate({
   eventImages: Record<string, string>;
 }) {
   return (
-    <section className="weekly-events-poster">
+    <section className="weekly-events-poster" data-event-count={events.length}>
       <img className="weekly-events-background" src={backgroundImageUrl ?? "/stories/weekly-bg.png"} alt="" />
       <div className="weekly-events-overlay" />
       <header className="weekly-events-header">
@@ -73,6 +73,7 @@ export function WeeklyEventsTemplate({
           </article>
         ))}
       </div>
+      <div className="weekly-events-link-sticker-space" aria-hidden="true">Add link sticker here</div>
       {events.length === 0 && <p className="weekly-events-empty">No workshops or events scheduled this week.</p>}
     </section>
   );
