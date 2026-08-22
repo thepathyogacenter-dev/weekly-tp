@@ -57,7 +57,7 @@ function spaceFor(location: string | null | undefined): Space {
 function teachersFor(session: MomenceSession): string[] {
   const teachers = [session.teacher, ...(session.additionalTeachers ?? [])]
     .map((teacher) => (typeof teacher === "string" ? teacher : teacher?.name ?? ""))
-    .map((teacher) => teacher.trim())
+    .map((teacher) => teacher.replace(/\s+/g, " ").replace(/\s*\.\s*$/, "").trim())
     .filter(Boolean);
   return [...new Set(teachers)];
 }

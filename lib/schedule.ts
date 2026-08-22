@@ -27,14 +27,29 @@ function classKey(item: ClassItem): string {
   return `${item.day}|${normalizeName(item.name)}`;
 }
 
+function teacherKey(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, " ").replace(/\s*\.\s*$/, "").trim();
+}
+
+function isCoveredByMomence(item: ClassItem, momence: ClassItem[]): boolean {
+  if (momence.some((momenceItem) => classKey(momenceItem) === classKey(item))) return true;
+  if (item.start === null) return false;
+
+  return momence.some(
+    (momenceItem) =>
+      momenceItem.day === item.day &&
+      momenceItem.start === item.start &&
+      momenceItem.teachers.some((teacher) => item.teachers.some((sheetTeacher) => teacherKey(teacher) === teacherKey(sheetTeacher)))
+  );
+}
+
 /**
- * Momence selalu up-to-date, jadi dia yang menang untuk kelas reguler. Sheet cuma
- * menambah entri yang belum ada di Momence — workshop/training/event seperti "Yin YTT"
- * yang nggak muncul di feed booking publik.
+ * Momence adalah sumber jadwal guru. Sheet hanya boleh melengkapi workshop/event yang
+ * secara eksplisit ditandai, karena kelas reguler yang masih tersisa di Sheet bisa
+ * saja sudah diubah atau dibatalkan di Momence.
  */
 function mergeMomenceWithSheet(momence: ClassItem[], sheet: ClassItem[]): ClassItem[] {
-  const covered = new Set(momence.map(classKey));
-  const extras = sheet.filter((item) => !covered.has(classKey(item)));
+  const extras = sheet.filter((item) => item.tag !== null && !isCoveredByMomence(item, momence));
   return [...momence, ...extras];
 }
 

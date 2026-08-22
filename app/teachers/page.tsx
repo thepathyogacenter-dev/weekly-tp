@@ -48,7 +48,7 @@ export default async function TeachersPage() {
 
       <footer className="footnote">
         <span>
-          Source: {data.source === "sheet" ? "Google Sheet" : "Local fallback"} · refreshed every {REVALIDATE / 60} min
+          Source: {data.source === "momence" ? "Momence" : data.source === "sheet" ? "Google Sheet" : "Local fallback"} · refreshed every {REVALIDATE / 60} min
         </span>
         <span>All times WITA (UTC+8)</span>
       </footer>
