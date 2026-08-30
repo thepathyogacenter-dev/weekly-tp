@@ -1,3 +1,5 @@
+"use client";
+
 import type { ClassItem, Day } from "@/lib/types";
 import { titleCase } from "@/lib/stories";
 
@@ -29,13 +31,22 @@ export function WeeklyStoryTemplate({
   dateRangeLabel,
   shala,
   backgroundImageUrl,
+  editable = false,
+  onClassChange,
+  title,
+  onTitleChange,
 }: {
   classesByDay: Record<Day, ClassItem[]>;
   dateRangeLabel: string;
   shala: "outdoor" | "indoor";
   backgroundImageUrl: string | null;
+  editable?: boolean;
+  onClassChange?: (id: string, patch: { name?: string; teachers?: string[]; timeLabel?: string }) => void;
+  title?: string;
+  onTitleChange?: (title: string) => void;
 }) {
-  const title = shala === "outdoor" ? "Outdoor Shala Schedule" : "Indoor Shala Schedule";
+  const defaultTitle = shala === "outdoor" ? "Outdoor Shala Schedule" : "Indoor Shala Schedule";
+  const posterTitle = title || defaultTitle;
 
   return (
     <>
@@ -52,7 +63,7 @@ export function WeeklyStoryTemplate({
       <div className="weekly-poster-overlay" />
 
       <section className="weekly-poster-panel">
-        <h1 className="weekly-poster-title">{title}</h1>
+        <h1 className={`weekly-poster-title${editable ? " story-canvas-editable" : ""}`} contentEditable={editable} suppressContentEditableWarning onBlur={(event) => onTitleChange?.(event.currentTarget.textContent?.trim() || defaultTitle)}>{posterTitle}</h1>
         <div className="weekly-poster-range">{dateRangeLabel}</div>
 
         <div className="weekly-poster-grid">
@@ -70,7 +81,7 @@ export function WeeklyStoryTemplate({
                       {classes.map((classItem) => (
                         <div className="weekly-poster-row" key={classItem.id}>
                           <div className="weekly-poster-time">
-                            <span>{startTime(classItem)}</span>
+                            <span className={editable ? "story-canvas-editable" : undefined} contentEditable={editable} suppressContentEditableWarning onBlur={(event) => onClassChange?.(classItem.id, { timeLabel: event.currentTarget.textContent?.trim() || classItem.timeLabel })}>{startTime(classItem)}</span>
                             {duration(classItem) && <small>({duration(classItem)})</small>}
                           </div>
                           {classItem.tag && (
@@ -79,8 +90,8 @@ export function WeeklyStoryTemplate({
                             </span>
                           )}
                           <div className="weekly-poster-class">
-                            <strong>{classItem.name}</strong>
-                            {classItem.teachers.length > 0 && <span>{classItem.teachers.join(", ")}</span>}
+                            <strong className={editable ? "story-canvas-editable" : undefined} contentEditable={editable} suppressContentEditableWarning onBlur={(event) => onClassChange?.(classItem.id, { name: event.currentTarget.textContent?.trim() || classItem.name })}>{classItem.name}</strong>
+                            {classItem.teachers.length > 0 && <span className={editable ? "story-canvas-editable" : undefined} contentEditable={editable} suppressContentEditableWarning onBlur={(event) => onClassChange?.(classItem.id, { teachers: (event.currentTarget.textContent || "").split(",").map((teacher) => teacher.trim()).filter(Boolean) })}>{classItem.teachers.join(", ")}</span>}
                           </div>
                         </div>
                       ))}

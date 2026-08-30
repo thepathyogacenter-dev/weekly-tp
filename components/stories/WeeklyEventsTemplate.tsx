@@ -23,6 +23,7 @@ function duration(classItem: ClassItem) {
 }
 
 function eventTime(classItem: ClassItem) {
+  if (classItem.timeLabel) return classItem.timeLabel.split(" – ")[0] || "TBC";
   if (classItem.start === null) return "TBC";
   const hours = Math.floor(classItem.start / 60);
   const minutes = String(classItem.start % 60).padStart(2, "0");
@@ -52,7 +53,7 @@ export function WeeklyEventsTemplate({
   editable?: boolean;
   eventImagePositions?: Record<string, number>;
   onEventImagePositionChange?: (eventId: string, position: number) => void;
-  onEventChange?: (eventId: string, patch: { name?: string; teachers?: string[]; tag?: ClassItem["tag"] }) => void;
+  onEventChange?: (eventId: string, patch: { name?: string; teachers?: string[]; tag?: ClassItem["tag"]; timeLabel?: string }) => void;
   headerTitle?: string;
   onHeaderTitleChange?: (title: string) => void;
 }) {
@@ -117,7 +118,7 @@ export function WeeklyEventsTemplate({
                 } : undefined}
               />
               <div className="weekly-event-card-time">
-                <strong>{eventTime(event)}</strong>
+                <strong className={editable ? "story-canvas-editable" : undefined} contentEditable={editable} suppressContentEditableWarning onBlur={(target) => onEventChange?.(event.id, { timeLabel: target.currentTarget.textContent?.trim() || event.timeLabel })}>{eventTime(event)}</strong>
                 {duration(event) && <span>{duration(event)}</span>}
               </div>
               <h2

@@ -1,3 +1,5 @@
+"use client";
+
 import type { ClassItem, Day } from "@/lib/types";
 
 const DAY_COLUMNS: Day[][] = [
@@ -32,9 +34,17 @@ function scheduleForDay(classes: ClassItem[]) {
 export function TeacherWeeklyTemplate({
   classesByDay,
   week,
+  editable = false,
+  onClassChange,
+  title = "Weekly Schedule",
+  onTitleChange,
 }: {
   classesByDay: Record<Day, ClassItem[]>;
   week: Record<Day, Date>;
+  editable?: boolean;
+  onClassChange?: (id: string, patch: { name?: string; teachers?: string[]; timeLabel?: string }) => void;
+  title?: string;
+  onTitleChange?: (title: string) => void;
 }) {
   return (
     <section className="teacher-weekly-poster">
@@ -42,7 +52,7 @@ export function TeacherWeeklyTemplate({
 
       <header className="teacher-weekly-header">
         <div className="teacher-weekly-title-block">
-          <span>Weekly Schedule</span>
+          <span className={editable ? "story-canvas-editable" : undefined} contentEditable={editable} suppressContentEditableWarning onBlur={(event) => onTitleChange?.(event.currentTarget.textContent?.trim() || "Weekly Schedule")}>{title}</span>
           <strong>{weeklyRangeLabel(week)}</strong>
         </div>
         <div className="teacher-weekly-meta">
@@ -68,11 +78,11 @@ export function TeacherWeeklyTemplate({
                     ) : (
                       classes.map((classItem) => (
                         <div className="teacher-weekly-row" key={classItem.id}>
-                          <time>{timeLabel(classItem)}</time>
+                          <time className={editable ? "story-canvas-editable" : undefined} contentEditable={editable} suppressContentEditableWarning onBlur={(event) => onClassChange?.(classItem.id, { timeLabel: event.currentTarget.textContent?.trim() || classItem.timeLabel })}>{timeLabel(classItem)}</time>
                           {classItem.tag && <span className="teacher-weekly-tag">{classItem.tag === "EVENT" ? "E" : "W"}</span>}
                           <p>
-                            <strong>{classItem.name}</strong>
-                            {classItem.teachers.length > 0 && <span> with {classItem.teachers.join(", ")}</span>}
+                            <strong className={editable ? "story-canvas-editable" : undefined} contentEditable={editable} suppressContentEditableWarning onBlur={(event) => onClassChange?.(classItem.id, { name: event.currentTarget.textContent?.trim() || classItem.name })}>{classItem.name}</strong>
+                            {classItem.teachers.length > 0 && <span className={editable ? "story-canvas-editable" : undefined} contentEditable={editable} suppressContentEditableWarning onBlur={(event) => onClassChange?.(classItem.id, { teachers: (event.currentTarget.textContent || "").replace(/^\s*with\s*/i, "").split(",").map((teacher) => teacher.trim()).filter(Boolean) })}> with {classItem.teachers.join(", ")}</span>}
                           </p>
                         </div>
                       ))

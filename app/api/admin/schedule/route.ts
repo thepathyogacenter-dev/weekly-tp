@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE, validAdminSession } from "@/lib/adminAuth";
-import { clearOverrides, overridesConfigured, readOverrides, writeOverrides } from "@/lib/scheduleStore";
-import type { ClassItem } from "@/lib/types";
+import { clearOverrides, overridesConfigured, readOverrides, readStoryDesign, writeOverrides, writeStoryDesign } from "@/lib/scheduleStore";
+import type { ClassItem, SharedStoryDesign } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -19,8 +19,8 @@ async function isAdmin() {
 export async function GET(request: Request) {
   const week = new URL(request.url).searchParams.get("week") ?? "";
   if (!WEEK_RE.test(week)) return NextResponse.json({ error: "Invalid week." }, { status: 400, headers: NO_STORE });
-  const classes = await readOverrides(week);
-  return NextResponse.json({ classes, configured: overridesConfigured() }, { headers: NO_STORE });
+  const [classes, design] = await Promise.all([readOverrides(week), readStoryDesign(week)]);
+  return NextResponse.json({ classes, design, configured: overridesConfigured() }, { headers: NO_STORE });
 }
 
 // Save the shared overrides (admin only).
@@ -52,4 +52,19 @@ export async function DELETE(request: Request) {
     revalidatePath("/api/schedule");
   }
   return NextResponse.json({ ok }, { status: ok ? 200 : 503, headers: NO_STORE });
+}
+
+// Save editable poster details for every device without replacing schedule data.
+export async function PATCH(request: Request) {
+  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401, headers: NO_STORE });
+  const body = await request.json().catch(() => null);
+  const week = typeof body?.week === "string" ? body.week : "";
+  if (!WEEK_RE.test(week) || !body?.design || typeof body.design !== "object" || Array.isArray(body.design)) {
+    return NextResponse.json({ error: "Invalid payload." }, { status: 400, headers: NO_STORE });
+  }
+  const ok = await writeStoryDesign(week, body.design as SharedStoryDesign);
+  if (ok) {
+    revalidatePath("/stories");
+  }
+  return NextResponse.json({ ok, configured: overridesConfigured() }, { status: ok ? 200 : 503, headers: NO_STORE });
 }

@@ -1,4 +1,4 @@
-import type { ClassItem } from "./types";
+import type { ClassItem, SharedStoryDesign } from "./types";
 
 // Server-side store for admin schedule overrides, keyed by the week's Monday
 // (YYYY-MM-DD). Uses Vercel KV so every device shares the same live edits.
@@ -6,6 +6,8 @@ import type { ClassItem } from "./types";
 // and callers fall back to per-browser localStorage.
 
 const PREFIX = "schedule-overrides:";
+const DESIGN_PREFIX = "story-design:";
+const STORY_IMAGE_PREFIX = "story-image:";
 const OVERRIDE_VERSION = 2;
 
 type StoredOverride = {
@@ -48,6 +50,51 @@ export async function clearOverrides(weekKey: string): Promise<boolean> {
   try {
     const { kv } = await import("@vercel/kv");
     await kv.del(`${PREFIX}${weekKey}`);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// A separate, small shared record for editable story canvas details. Keeping it
+// apart from the class override prevents a title/crop adjustment overwriting a
+// schedule edit made by another admin.
+export async function readStoryDesign(weekKey: string): Promise<SharedStoryDesign> {
+  if (!overridesConfigured()) return {};
+  try {
+    const { kv } = await import("@vercel/kv");
+    return (await kv.get<SharedStoryDesign>(`${DESIGN_PREFIX}${weekKey}`)) ?? {};
+  } catch {
+    return {};
+  }
+}
+
+export async function writeStoryDesign(weekKey: string, design: SharedStoryDesign): Promise<boolean> {
+  if (!overridesConfigured()) return false;
+  try {
+    const { kv } = await import("@vercel/kv");
+    await kv.set(`${DESIGN_PREFIX}${weekKey}`, design);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function readStoryImage(weekKey: string, eventId: string): Promise<string | null> {
+  if (!overridesConfigured()) return null;
+  try {
+    const { kv } = await import("@vercel/kv");
+    return await kv.get<string>(`${STORY_IMAGE_PREFIX}${weekKey}:${eventId}`);
+  } catch {
+    return null;
+  }
+}
+
+export async function writeStoryImage(weekKey: string, eventId: string, image: string): Promise<boolean> {
+  if (!overridesConfigured()) return false;
+  try {
+    const { kv } = await import("@vercel/kv");
+    await kv.set(`${STORY_IMAGE_PREFIX}${weekKey}:${eventId}`, image);
     return true;
   } catch {
     return false;

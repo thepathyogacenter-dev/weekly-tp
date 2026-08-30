@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { type ClassItem, type Day, type SchedulePayload } from "@/lib/types";
+import { type ClassItem, type Day, type SchedulePayload, type SharedStoryDesign } from "@/lib/types";
 import {
   classesForDay,
   datesForWeek,
@@ -38,8 +38,8 @@ export function StoriesClient({
   const [adminClasses, setAdminClasses] = useState<ClassItem[]>(data.classes);
   const [syncState, setSyncState] = useState<"saved" | "saving" | "error">("saved");
   const [dailyEditing, setDailyEditing] = useState(false);
-  const [weeklyEventsEditing, setWeeklyEventsEditing] = useState(false);
-  const [weeklyEventsTitle, setWeeklyEventsTitle] = useState("This week at The Path");
+  const [weeklyCanvasEditing, setWeeklyCanvasEditing] = useState(false);
+  const [storyDesign, setStoryDesign] = useState<SharedStoryDesign>({});
 
   const week = useMemo(() => datesForWeek(TZ), []);
   // Semua post Instagram (termasuk Daily) ambil dari Schedule Editor (adminClasses),
@@ -51,7 +51,10 @@ export function StoriesClient({
   const dateLabel = formatDateLabel(new Date(dailyDate), TZ);
   const weekKey = week.MONDAY.toISOString().slice(0, 10);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const designSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSharedClasses = useRef<ClassItem[]>(data.classes);
+  const storyDesignRef = useRef<SharedStoryDesign>({});
+  const lastSharedDesign = useRef<SharedStoryDesign>({});
 
   const classesByDay: Record<Day, ClassItem[]> = Object.fromEntries(
     ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"].map((d) => [
@@ -71,11 +74,7 @@ export function StoriesClient({
         ),
     [adminClasses]
   );
-  const storageKey = `the-path-weekly-event-images-${week.MONDAY.toISOString().slice(0, 10)}`;
   const [eventImages, setEventImages] = useState<Record<string, string>>({});
-  const [eventImagePositions, setEventImagePositions] = useState<Record<string, number>>({});
-  const eventPositionsKey = `${storageKey}-positions`;
-  const eventTitleKey = `${storageKey}-title`;
 
   useEffect(() => {
     lastSharedClasses.current = data.classes;
@@ -124,39 +123,68 @@ export function StoriesClient({
   };
 
   useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(storageKey);
-      if (saved) setEventImages(JSON.parse(saved));
-      const savedPositions = window.localStorage.getItem(eventPositionsKey);
-      if (savedPositions) setEventImagePositions(JSON.parse(savedPositions));
-      const savedTitle = window.localStorage.getItem(eventTitleKey);
-      if (savedTitle) setWeeklyEventsTitle(savedTitle);
-    } catch {
-      setEventImages({});
-    }
-  }, [storageKey, eventPositionsKey, eventTitleKey]);
+    let active = true;
+    Promise.all(weeklyEvents.map(async (event) => {
+      const response = await fetch(`/api/admin/story-image?week=${weekKey}&event=${encodeURIComponent(event.id)}`, { cache: "no-store" });
+      const result = response.ok ? await response.json() : null;
+      return [event.id, result?.image] as const;
+    })).then((items) => {
+      if (!active) return;
+      setEventImages(Object.fromEntries(items.filter(([, image]) => typeof image === "string")));
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, [weekKey, weeklyEvents]);
 
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(storageKey, JSON.stringify(eventImages));
-      window.localStorage.setItem(eventPositionsKey, JSON.stringify(eventImagePositions));
-      window.localStorage.setItem(eventTitleKey, weeklyEventsTitle);
-    } catch {
-      // Image selections are still available until the current page is closed.
-    }
-  }, [eventImages, eventImagePositions, weeklyEventsTitle, storageKey, eventPositionsKey, eventTitleKey]);
 
-  const updateWeeklyEvent = (id: string, patch: { name?: string; teachers?: string[]; tag?: ClassItem["tag"] }) => {
+  const updateStoryDesign = (patch: Partial<SharedStoryDesign>) => {
+    const next = { ...storyDesignRef.current, ...patch };
+    storyDesignRef.current = next;
+    setStoryDesign(next);
+    setSyncState("saving");
+    if (designSaveTimer.current) clearTimeout(designSaveTimer.current);
+    designSaveTimer.current = setTimeout(async () => {
+      try {
+        const response = await fetch("/api/admin/schedule", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ week: weekKey, design: next }),
+        });
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result?.ok) throw new Error("Shared story design save failed");
+        lastSharedDesign.current = next;
+        setSyncState("saved");
+      } catch {
+        storyDesignRef.current = lastSharedDesign.current;
+        setStoryDesign(lastSharedDesign.current);
+        setSyncState("error");
+      }
+    }, 450);
+  };
+
+  const updateWeeklyClass = (id: string, patch: { name?: string; teachers?: string[]; tag?: ClassItem["tag"]; timeLabel?: string }) => {
     applyChange(adminClasses.map((classItem) => classItem.id === id ? { ...classItem, ...patch } : classItem));
   };
 
   const uploadEventImage = (eventId: string, file: File | undefined) => {
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       const image = reader.result;
-      if (typeof image === "string") {
-        setEventImages((current) => ({ ...current, [eventId]: image }));
+      if (typeof image !== "string") return;
+      setEventImages((current) => ({ ...current, [eventId]: image }));
+      setSyncState("saving");
+      try {
+        const response = await fetch("/api/admin/story-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ week: weekKey, event: eventId, image }),
+        });
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result?.ok) throw new Error("Shared image save failed");
+        setSyncState("saved");
+      } catch {
+        setEventImages((current) => { const next = { ...current }; delete next[eventId]; return next; });
+        setSyncState("error");
       }
     };
     reader.readAsDataURL(file);
@@ -324,8 +352,9 @@ export function StoriesClient({
             <div>
               <p className="stories-panel-label">New weekly story</p>
               <h2 id="weekly-events-admin-title">Events & workshops</h2>
-              <p>Click <strong>Edit in canvas</strong> to edit the poster text or drag an image vertically to choose its crop. Image uploads are also shared with the Weekly Posts Carousel.</p>
-              <button type="button" className="story-edit-link" onClick={() => setWeeklyEventsEditing((editing) => !editing)}>{weeklyEventsEditing ? "Done editing" : "Edit in canvas"}</button>
+              <p>Click <strong>Edit all canvases</strong> to edit every weekly poster. Text and image crops are shared across every device automatically.</p>
+              <button type="button" className="story-edit-link" onClick={() => setWeeklyCanvasEditing((editing) => !editing)}>{weeklyCanvasEditing ? "Done editing" : "Edit all canvases"}</button>
+              {syncState !== "saved" && <p className="stories-source-note" role="status">{syncState === "saving" ? "Saving shared changes…" : "Could not save. Your last shared version was restored."}</p>}
             </div>
             <div className="weekly-events-upload-list">
               {weeklyEvents.map((event) => (
@@ -348,19 +377,19 @@ export function StoriesClient({
                   week={week}
                   backgroundImageUrl={data.weeklyBackgroundImage}
                   eventImages={eventImages}
-                  editable={weeklyEventsEditing}
-                  eventImagePositions={eventImagePositions}
-                  onEventImagePositionChange={(id, position) => setEventImagePositions((current) => ({ ...current, [id]: position }))}
-                  onEventChange={updateWeeklyEvent}
-                  headerTitle={weeklyEventsTitle}
-                  onHeaderTitleChange={setWeeklyEventsTitle}
+                  editable={weeklyCanvasEditing}
+                  eventImagePositions={storyDesign.eventImagePositions}
+                  onEventImagePositionChange={(id, position) => updateStoryDesign({ eventImagePositions: { ...storyDesignRef.current.eventImagePositions, [id]: position } })}
+                  onEventChange={updateWeeklyClass}
+                  headerTitle={storyDesign.eventsTitle}
+                  onHeaderTitleChange={(eventsTitle) => updateStoryDesign({ eventsTitle })}
                 />
               </StoryCanvas>
             </div>
             <div>
             <p className="stories-panel-label">Teacher WhatsApp bulletin</p>
             <StoryCanvas filename="weekly-teacher-whatsapp-schedule.png" label="Teacher WhatsApp bulletin">
-              <TeacherWeeklyTemplate classesByDay={classesByDay} week={week} />
+              <TeacherWeeklyTemplate classesByDay={classesByDay} week={week} editable={weeklyCanvasEditing} onClassChange={updateWeeklyClass} title={storyDesign.teacherTitle} onTitleChange={(teacherTitle) => updateStoryDesign({ teacherTitle })} />
             </StoryCanvas>
             </div>
             {([
@@ -375,6 +404,10 @@ export function StoriesClient({
                   dateRangeLabel={weekRangeLabel(["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"], week, TZ)}
                   shala={shala}
                   backgroundImageUrl={data.weeklyBackgroundImage}
+                  editable={weeklyCanvasEditing}
+                  onClassChange={updateWeeklyClass}
+                  title={shala === "outdoor" ? storyDesign.outdoorTitle : storyDesign.indoorTitle}
+                  onTitleChange={(title) => updateStoryDesign(shala === "outdoor" ? { outdoorTitle: title } : { indoorTitle: title })}
                 />
               </StoryCanvas>
             </div>

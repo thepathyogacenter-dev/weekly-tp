@@ -40,3 +40,11 @@ export interface SchedulePayload {
   source: "momence" | "sheet" | "fallback";
   fetchedAt: string;
 }
+
+export interface SharedStoryDesign {
+  eventsTitle?: string;
+  teacherTitle?: string;
+  outdoorTitle?: string;
+  indoorTitle?: string;
+  eventImagePositions?: Record<string, number>;
+}
