@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE, validAdminSession } from "@/lib/adminAuth";
-import { addStoryLibraryItem, readStoryLibrary } from "@/lib/storyLibraryStore";
+import { addStoryLibraryItem, readStoryLibrary, updateStoryLibraryItem } from "@/lib/storyLibraryStore";
 
 export const dynamic = "force-dynamic";
 const NO_STORE = { "Cache-Control": "no-store" };
@@ -26,5 +26,19 @@ export async function POST(request: Request) {
   }
   const item = { id: crypto.randomUUID(), title, image };
   const ok = await addStoryLibraryItem(item);
+  return NextResponse.json({ ok, item: ok ? item : null }, { status: ok ? 200 : 503, headers: NO_STORE });
+}
+
+export async function PATCH(request: Request) {
+  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized." }, { status: 401, headers: NO_STORE });
+  const body = await request.json().catch(() => null);
+  const id = typeof body?.id === "string" ? body.id.slice(0, 200) : "";
+  const title = typeof body?.title === "string" ? body.title.trim().slice(0, 100) : "";
+  const image = typeof body?.image === "string" ? body.image : undefined;
+  if (!id || !title || (image !== undefined && (!/^data:image\/jpeg;base64,/.test(image) || image.length > 650_000))) {
+    return NextResponse.json({ error: "Invalid design update." }, { status: 400, headers: NO_STORE });
+  }
+  const item = { id, title, ...(image ? { image } : {}) };
+  const ok = await updateStoryLibraryItem(item);
   return NextResponse.json({ ok, item: ok ? item : null }, { status: ok ? 200 : 503, headers: NO_STORE });
 }

@@ -25,3 +25,17 @@ export async function addStoryLibraryItem(item: StoryLibraryItem): Promise<boole
     return false;
   }
 }
+
+export async function updateStoryLibraryItem(item: StoryLibraryItem): Promise<boolean> {
+  if (!overridesConfigured()) return false;
+  try {
+    const { kv } = await import("@vercel/kv");
+    const current = await readStoryLibrary();
+    const index = current.findIndex((entry) => entry.id === item.id);
+    const next = index === -1 ? [item, ...current] : current.map((entry) => entry.id === item.id ? { ...entry, ...item } : entry);
+    await kv.set(KEY, next);
+    return true;
+  } catch {
+    return false;
+  }
+}

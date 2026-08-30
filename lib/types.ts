@@ -52,5 +52,5 @@ export interface SharedStoryDesign {
 export interface StoryLibraryItem {
   id: string;
   title: string;
-  image: string;
+  image?: string;
 }

@@ -13,6 +13,7 @@ const STORIES = [
 ] as const;
 
 type LibraryEntry = { id: string; title: string; src: string; filename: string };
+const STATIC_IDS = new Set<string>(STORIES);
 
 function displayName(filename: string) { return filename.replace(/^IG Story - /, "").replace(/ - Story(?:-1)?/, "").replace(/\.png$/, ""); }
 function fileName(title: string) { return (title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "story") + ".jpg"; }
@@ -35,12 +36,18 @@ export function StoryLibrary() {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploadState, setUploadState] = useState<"idle" | "uploading" | "error">("idle");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
+  const [editingState, setEditingState] = useState<"idle" | "saving" | "error">("idle");
 
   useEffect(() => { fetch("/api/admin/story-library", { cache: "no-store" }).then((response) => response.ok ? response.json() : null).then((result) => setItems(Array.isArray(result?.items) ? result.items : [])).catch(() => undefined); }, []);
 
   const entries: LibraryEntry[] = [
-    ...items.map((item) => ({ id: item.id, title: item.title, src: item.image, filename: fileName(item.title) })),
-    ...STORIES.map((filename) => ({ id: filename, title: displayName(filename), src: "/stories/" + encodeURIComponent(filename), filename })),
+    ...items.filter((item) => !STATIC_IDS.has(item.id) && item.image).map((item) => ({ id: item.id, title: item.title, src: item.image as string, filename: fileName(item.title) })),
+    ...STORIES.map((filename) => {
+      const saved = items.find((item) => item.id === filename);
+      return { id: filename, title: saved?.title || displayName(filename), src: saved?.image || "/stories/" + encodeURIComponent(filename), filename: saved?.image ? fileName(saved.title) : filename };
+    }),
   ];
   const share = async (entry: LibraryEntry) => {
     setSharing(entry.id);
@@ -50,6 +57,19 @@ export function StoryLibrary() {
       else { const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = entry.filename; link.click(); URL.revokeObjectURL(link.href); }
     } finally { setSharing(null); }
   };
+  const startEditing = (entry: LibraryEntry) => { setEditingId(entry.id); setEditingTitle(entry.title); setEditingState("idle"); };
+  const saveEdit = async (entry: LibraryEntry, replacement?: File) => {
+    const nextTitle = editingTitle.trim() || entry.title;
+    setEditingState("saving");
+    try {
+      const image = replacement ? await prepareImage(replacement) : undefined;
+      const response = await fetch("/api/admin/story-library", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: entry.id, title: nextTitle, image }) });
+      const result = await response.json().catch(() => null); if (!response.ok || !result?.item) throw new Error("Save failed");
+      setItems((current) => { const index = current.findIndex((item) => item.id === entry.id); return index === -1 ? [result.item, ...current] : current.map((item) => item.id === entry.id ? { ...item, ...result.item } : item); });
+      setEditingId(null); setEditingState("idle");
+    } catch { setEditingState("error"); }
+  };
+
   const upload = async (event: React.FormEvent) => {
     event.preventDefault(); if (!file || !title.trim()) return; setUploadState("uploading");
     try {
@@ -68,6 +88,10 @@ export function StoryLibrary() {
       <button type="submit" disabled={uploadState === "uploading"}>{uploadState === "uploading" ? "Adding…" : "Add to library"}</button>
       {uploadState === "error" && <p role="status">Could not add this image. Try a different image file.</p>}
     </form>
-    <div className="story-library-grid">{entries.map((entry) => <article className="story-library-card" key={entry.id}><img src={entry.src} alt={entry.title} /><h3>{entry.title}</h3><div><a href={entry.src} download={entry.filename}>Download</a><button type="button" onClick={() => share(entry)} disabled={sharing === entry.id}>{sharing === entry.id ? "Preparing…" : "Share"}</button></div></article>)}</div>
+    <div className="story-library-grid">{entries.map((entry) => <article className="story-library-card" key={entry.id}>
+      <img src={entry.src} alt={entry.title} />
+      <h3 contentEditable={editingId === entry.id} suppressContentEditableWarning onInput={(event) => editingId === entry.id && setEditingTitle(event.currentTarget.textContent || "")}>{entry.title}</h3>
+      {editingId === entry.id ? <div className="story-library-card-edit"><label>Replace image<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => saveEdit(entry, event.target.files?.[0])} /></label><button type="button" onClick={() => saveEdit(entry)} disabled={editingState === "saving"}>{editingState === "saving" ? "Saving…" : "Save name"}</button><button type="button" onClick={() => setEditingId(null)}>Cancel</button>{editingState === "error" && <p>Could not save. Try again.</p>}</div> : <div><a href={entry.src} download={entry.filename}>Download</a><button type="button" onClick={() => share(entry)} disabled={sharing === entry.id}>{sharing === entry.id ? "Preparing…" : "Share"}</button><button type="button" onClick={() => startEditing(entry)}>Edit</button></div>}
+    </article>)}</div>
   </section>;
 }
