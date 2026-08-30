@@ -48,3 +48,9 @@ export interface SharedStoryDesign {
   indoorTitle?: string;
   eventImagePositions?: Record<string, number>;
 }
+
+export interface StoryLibraryItem {
+  id: string;
+  title: string;
+  image: string;
+}

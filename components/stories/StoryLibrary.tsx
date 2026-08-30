@@ -1,77 +1,73 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { StoryLibraryItem } from "@/lib/types";
 
 const STORIES = [
-  "Applied Neuro Yoga Teacher Training - Story-1.png",
-  "Applied Neuro Yoga Teacher Training - Story.png",
-  "IG Story - BW Training 2027.png",
-  "IG Story - BW Training 2028.png",
-  "IG Story - BW Training 2029.png",
-  "IG Story - Sound Healing 30 Hour 2027.png",
-  "IG Story - Sound Healing 30 Hour 2028.png",
-  "IG Story - Sound Healing 30 Hour 2029.png",
-  "IG Story - YTT 200 Hour 2029.png",
-  "IG Story - YTT 200 Hour 2030.png",
-  "IG Story - YTT 200 Hour 2031.png",
-  "IG Story - Yin Fascia 60 Hour 2027.png",
-  "IG Story - Yin Fascia 60 Hour 2028.png",
-  "IG Story - Yin Fascia 60 Hour 2029.png",
-  "IG Story - Yin Fascia 60 Hour 2030.png",
-  "IG Story - Yin TT 60 Hour 2027.png",
-  "IG Story - Yin TT 60 Hour 2028.png",
-  "IG Story - Yin TT 60 Hour 2029.png",
+  "Applied Neuro Yoga Teacher Training - Story-1.png", "Applied Neuro Yoga Teacher Training - Story.png",
+  "IG Story - BW Training 2027.png", "IG Story - BW Training 2028.png", "IG Story - BW Training 2029.png",
+  "IG Story - Sound Healing 30 Hour 2027.png", "IG Story - Sound Healing 30 Hour 2028.png", "IG Story - Sound Healing 30 Hour 2029.png",
+  "IG Story - YTT 200 Hour 2029.png", "IG Story - YTT 200 Hour 2030.png", "IG Story - YTT 200 Hour 2031.png",
+  "IG Story - Yin Fascia 60 Hour 2027.png", "IG Story - Yin Fascia 60 Hour 2028.png", "IG Story - Yin Fascia 60 Hour 2029.png", "IG Story - Yin Fascia 60 Hour 2030.png",
+  "IG Story - Yin TT 60 Hour 2027.png", "IG Story - Yin TT 60 Hour 2028.png", "IG Story - Yin TT 60 Hour 2029.png",
 ] as const;
 
-function displayName(filename: string) {
-  return filename.replace(/^IG Story - /, "").replace(/ - Story(?:-1)?/, "").replace(/\.png$/, "");
+type LibraryEntry = { id: string; title: string; src: string; filename: string };
+
+function displayName(filename: string) { return filename.replace(/^IG Story - /, "").replace(/ - Story(?:-1)?/, "").replace(/\.png$/, ""); }
+function fileName(title: string) { return (title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "story") + ".jpg"; }
+
+async function prepareImage(file: File) {
+  const sourceUrl = await new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(new Error("Could not read image")); reader.readAsDataURL(file); });
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => { const element = new Image(); element.onload = () => resolve(element); element.onerror = () => reject(new Error("Could not prepare image")); element.src = sourceUrl; });
+  const ratio = Math.min(1, 1080 / Math.max(image.naturalWidth, image.naturalHeight));
+  const canvas = document.createElement("canvas"); canvas.width = Math.round(image.naturalWidth * ratio); canvas.height = Math.round(image.naturalHeight * ratio);
+  const context = canvas.getContext("2d"); if (!context) throw new Error("Could not prepare image");
+  context.fillStyle = "#fff"; context.fillRect(0, 0, canvas.width, canvas.height); context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  let quality = 0.84; let result = canvas.toDataURL("image/jpeg", quality);
+  while (result.length > 600_000 && quality > 0.5) { quality -= 0.08; result = canvas.toDataURL("image/jpeg", quality); }
+  return result;
 }
 
 export function StoryLibrary() {
   const [sharing, setSharing] = useState<string | null>(null);
+  const [items, setItems] = useState<StoryLibraryItem[]>([]);
+  const [title, setTitle] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [uploadState, setUploadState] = useState<"idle" | "uploading" | "error">("idle");
 
-  const share = async (filename: string) => {
-    setSharing(filename);
+  useEffect(() => { fetch("/api/admin/story-library", { cache: "no-store" }).then((response) => response.ok ? response.json() : null).then((result) => setItems(Array.isArray(result?.items) ? result.items : [])).catch(() => undefined); }, []);
+
+  const entries: LibraryEntry[] = [
+    ...items.map((item) => ({ id: item.id, title: item.title, src: item.image, filename: fileName(item.title) })),
+    ...STORIES.map((filename) => ({ id: filename, title: displayName(filename), src: "/stories/" + encodeURIComponent(filename), filename })),
+  ];
+  const share = async (entry: LibraryEntry) => {
+    setSharing(entry.id);
     try {
-      const response = await fetch(`/stories/${encodeURIComponent(filename)}`);
-      const blob = await response.blob();
-      const file = new File([blob], filename, { type: "image/png" });
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: displayName(filename) });
-      } else {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
-        URL.revokeObjectURL(link.href);
-      }
-    } finally {
-      setSharing(null);
-    }
+      const blob = await (await fetch(entry.src)).blob(); const storyFile = new File([blob], entry.filename, { type: blob.type || "image/png" });
+      if (navigator.canShare?.({ files: [storyFile] })) await navigator.share({ files: [storyFile], title: entry.title });
+      else { const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = entry.filename; link.click(); URL.revokeObjectURL(link.href); }
+    } finally { setSharing(null); }
+  };
+  const upload = async (event: React.FormEvent) => {
+    event.preventDefault(); if (!file || !title.trim()) return; setUploadState("uploading");
+    try {
+      const image = await prepareImage(file);
+      const response = await fetch("/api/admin/story-library", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title, image }) });
+      const result = await response.json().catch(() => null); if (!response.ok || !result?.item) throw new Error("Upload failed");
+      setItems((current) => [result.item, ...current]); setTitle(""); setFile(null); setUploadState("idle");
+    } catch { setUploadState("error"); }
   };
 
-  return (
-    <section className="story-library" aria-labelledby="story-library-title">
-      <header>
-        <p className="stories-panel-label">Always available</p>
-        <h2 id="story-library-title">Story library</h2>
-        <p>Reusable training stories saved in the admin. Download them or share directly to Instagram whenever you need them.</p>
-      </header>
-      <div className="story-library-grid">
-        {STORIES.map((filename) => {
-          const src = `/stories/${encodeURIComponent(filename)}`;
-          return (
-            <article className="story-library-card" key={filename}>
-              <img src={src} alt={displayName(filename)} />
-              <h3>{displayName(filename)}</h3>
-              <div>
-                <a href={src} download={filename}>Download</a>
-                <button type="button" onClick={() => share(filename)} disabled={sharing === filename}>{sharing === filename ? "Preparing…" : "Share"}</button>
-              </div>
-            </article>
-          );
-        })}
-      </div>
-    </section>
-  );
+  return <section className="story-library" aria-labelledby="story-library-title">
+    <header><p className="stories-panel-label">Always available</p><h2 id="story-library-title">Story library</h2><p>Reusable training and Instagram stories. Add a new approved design once, then every admin can download or share it.</p></header>
+    <form className="story-library-upload" onSubmit={upload}>
+      <label><span>Design title</span><input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. 200 Hour Training 2032" required /></label>
+      <label><span>Story design</span><input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setFile(event.target.files?.[0] ?? null)} required /></label>
+      <button type="submit" disabled={uploadState === "uploading"}>{uploadState === "uploading" ? "Adding…" : "Add to library"}</button>
+      {uploadState === "error" && <p role="status">Could not add this image. Try a different image file.</p>}
+    </form>
+    <div className="story-library-grid">{entries.map((entry) => <article className="story-library-card" key={entry.id}><img src={entry.src} alt={entry.title} /><h3>{entry.title}</h3><div><a href={entry.src} download={entry.filename}>Download</a><button type="button" onClick={() => share(entry)} disabled={sharing === entry.id}>{sharing === entry.id ? "Preparing…" : "Share"}</button></div></article>)}</div>
+  </section>;
 }
