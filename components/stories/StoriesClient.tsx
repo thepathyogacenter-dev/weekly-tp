@@ -55,6 +55,7 @@ export function StoriesClient({
   const lastSharedClasses = useRef<ClassItem[]>(data.classes);
   const storyDesignRef = useRef<SharedStoryDesign>({});
   const lastSharedDesign = useRef<SharedStoryDesign>({});
+  const savingRef = useRef(false);
 
   const classesByDay: Record<Day, ClassItem[]> = Object.fromEntries(
     ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"].map((d) => [
@@ -85,6 +86,7 @@ export function StoriesClient({
   // change when the server confirms it, so one browser cannot show unpublished data.
   const applyChange = (next: ClassItem[]) => {
     setAdminClasses(next);
+    savingRef.current = true;
     setSyncState("saving");
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
@@ -97,23 +99,28 @@ export function StoriesClient({
         const result = await response.json().catch(() => null);
         if (!response.ok || !result?.ok) throw new Error("Shared schedule save failed");
         lastSharedClasses.current = next;
+        savingRef.current = false;
         setSyncState("saved");
       } catch {
         setAdminClasses(lastSharedClasses.current);
+        savingRef.current = false;
         setSyncState("error");
       }
     }, 600);
   };
 
   const resetAdminClasses = async () => {
+    savingRef.current = true;
     setSyncState("saving");
     try {
       const response = await fetch(`/api/admin/schedule?week=${weekKey}`, { method: "DELETE" });
       const result = await response.json().catch(() => null);
       if (!response.ok || !result?.ok) throw new Error("Shared schedule reset failed");
+      savingRef.current = false;
       window.location.reload();
     } catch {
       setAdminClasses(lastSharedClasses.current);
+      savingRef.current = false;
       setSyncState("error");
     }
   };
@@ -121,6 +128,33 @@ export function StoriesClient({
   const updateDailyClass = (id: string, patch: { name?: string; teachers?: string[]; timeLabel?: string }) => {
     applyChange(adminClasses.map((classItem) => classItem.id === id ? { ...classItem, ...patch } : classItem));
   };
+
+  // Keep already-open admin pages aligned with shared edits from another device.
+  useEffect(() => {
+    let active = true;
+    const refreshSharedCanvas = async () => {
+      if (savingRef.current) return;
+      try {
+        const response = await fetch(`/api/admin/schedule?week=${weekKey}`, { cache: "no-store" });
+        const result = await response.json();
+        if (!active) return;
+        if (Array.isArray(result?.classes)) {
+          lastSharedClasses.current = result.classes;
+          setAdminClasses(result.classes);
+        }
+        if (result?.design && typeof result.design === "object") {
+          storyDesignRef.current = result.design;
+          lastSharedDesign.current = result.design;
+          setStoryDesign(result.design);
+        }
+      } catch {
+        // Retain the last confirmed shared version while offline.
+      }
+    };
+    void refreshSharedCanvas();
+    const timer = window.setInterval(refreshSharedCanvas, 10_000);
+    return () => { active = false; window.clearInterval(timer); };
+  }, [weekKey]);
 
   useEffect(() => {
     let active = true;
@@ -140,6 +174,7 @@ export function StoriesClient({
     const next = { ...storyDesignRef.current, ...patch };
     storyDesignRef.current = next;
     setStoryDesign(next);
+    savingRef.current = true;
     setSyncState("saving");
     if (designSaveTimer.current) clearTimeout(designSaveTimer.current);
     designSaveTimer.current = setTimeout(async () => {
@@ -152,10 +187,12 @@ export function StoriesClient({
         const result = await response.json().catch(() => null);
         if (!response.ok || !result?.ok) throw new Error("Shared story design save failed");
         lastSharedDesign.current = next;
+        savingRef.current = false;
         setSyncState("saved");
       } catch {
         storyDesignRef.current = lastSharedDesign.current;
         setStoryDesign(lastSharedDesign.current);
+        savingRef.current = false;
         setSyncState("error");
       }
     }, 450);
@@ -172,6 +209,7 @@ export function StoriesClient({
       const image = reader.result;
       if (typeof image !== "string") return;
       setEventImages((current) => ({ ...current, [eventId]: image }));
+      savingRef.current = true;
       setSyncState("saving");
       try {
         const response = await fetch("/api/admin/story-image", {
@@ -181,9 +219,11 @@ export function StoriesClient({
         });
         const result = await response.json().catch(() => null);
         if (!response.ok || !result?.ok) throw new Error("Shared image save failed");
+        savingRef.current = false;
         setSyncState("saved");
       } catch {
         setEventImages((current) => { const next = { ...current }; delete next[eventId]; return next; });
+        savingRef.current = false;
         setSyncState("error");
       }
     };
