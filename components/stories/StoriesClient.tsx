@@ -202,32 +202,62 @@ export function StoriesClient({
     applyChange(adminClasses.map((classItem) => classItem.id === id ? { ...classItem, ...patch } : classItem));
   };
 
-  const uploadEventImage = (eventId: string, file: File | undefined) => {
-    if (!file) return;
+  const prepareSharedStoryImage = (file: File) => new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = async () => {
-      const image = reader.result;
-      if (typeof image !== "string") return;
-      setEventImages((current) => ({ ...current, [eventId]: image }));
-      savingRef.current = true;
-      setSyncState("saving");
-      try {
-        const response = await fetch("/api/admin/story-image", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ week: weekKey, event: eventId, image }),
-        });
-        const result = await response.json().catch(() => null);
-        if (!response.ok || !result?.ok) throw new Error("Shared image save failed");
-        savingRef.current = false;
-        setSyncState("saved");
-      } catch {
-        setEventImages((current) => { const next = { ...current }; delete next[eventId]; return next; });
-        savingRef.current = false;
-        setSyncState("error");
-      }
+    reader.onerror = () => reject(new Error("Could not read image"));
+    reader.onload = () => {
+      const source = new Image();
+      source.onerror = () => reject(new Error("Could not prepare image"));
+      source.onload = () => {
+        let width = source.naturalWidth;
+        let height = source.naturalHeight;
+        const maxSide = 1080;
+        if (Math.max(width, height) > maxSide) {
+          const ratio = maxSide / Math.max(width, height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d");
+        if (!context) return reject(new Error("Could not prepare image"));
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, width, height);
+        context.drawImage(source, 0, 0, width, height);
+        let quality = 0.84;
+        let result = canvas.toDataURL("image/jpeg", quality);
+        while (result.length > 600_000 && quality > 0.5) {
+          quality -= 0.08;
+          result = canvas.toDataURL("image/jpeg", quality);
+        }
+        resolve(result);
+      };
+      source.src = String(reader.result);
     };
     reader.readAsDataURL(file);
+  });
+
+  const uploadEventImage = async (eventId: string, file: File | undefined) => {
+    if (!file) return;
+    savingRef.current = true;
+    setSyncState("saving");
+    try {
+      const image = await prepareSharedStoryImage(file);
+      const response = await fetch("/api/admin/story-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ week: weekKey, event: eventId, image }),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.ok) throw new Error("Shared image save failed");
+      setEventImages((current) => ({ ...current, [eventId]: image }));
+      savingRef.current = false;
+      setSyncState("saved");
+    } catch {
+      savingRef.current = false;
+      setSyncState("error");
+    }
   };
 
   return (

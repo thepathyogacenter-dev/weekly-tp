@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   const week = typeof body?.week === "string" ? body.week : "";
   const event = typeof body?.event === "string" ? body.event : "";
   const image = typeof body?.image === "string" ? body.image : "";
-  if (!WEEK_RE.test(week) || !event || event.length > 200 || !/^data:image\/(png|jpeg|webp);base64,/.test(image) || image.length > 700_000) {
+  if (!WEEK_RE.test(week) || !event || event.length > 200 || !/^data:image\/(png|jpeg|webp);base64,/.test(image) || image.length > 650_000) {
     return NextResponse.json({ error: "Use a PNG, JPG, or WebP image below 500 KB." }, { status: 400, headers: NO_STORE });
   }
   const ok = await writeStoryImage(week, event, image);
