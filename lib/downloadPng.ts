@@ -29,6 +29,28 @@ async function embedImagesForCapture(node: HTMLElement) {
   return () => originals.forEach(({ image, src }) => image.setAttribute("src", src));
 }
 
+async function canvasToBlob(canvas: HTMLCanvasElement) {
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+  if (blob) return blob;
+  return await (await fetch(canvas.toDataURL("image/png"))).blob();
+}
+
+async function createSafariPng(node: HTMLElement, size: { width: number; height: number }) {
+  const { default: html2canvas } = await import("html2canvas");
+  const canvas = await html2canvas(node, {
+    backgroundColor: null,
+    width: size.width,
+    height: size.height,
+    scale: 1,
+    useCORS: true,
+    allowTaint: false,
+    logging: false,
+    windowWidth: size.width,
+    windowHeight: size.height,
+  });
+  return canvasToBlob(canvas);
+}
+
 export async function createPngBlob(
   node: HTMLElement,
   size: { width: number; height: number }
@@ -46,10 +68,17 @@ export async function createPngBlob(
         height: `${size.height}px`,
       },
     };
-    // WebKit may return a blank first foreignObject render. Warming it once
-    // makes Safari exports match the on-screen canvas.
+    // Safari has recurring image-loss bugs with SVG foreignObject. Render its
+    // actual DOM through Canvas instead; the rest of the browsers keep the
+    // sharper SVG export path.
     const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent);
-    if (isSafari) await toPng(node, options);
+    if (isSafari) {
+      try {
+        return await createSafariPng(node, size);
+      } catch {
+        // Fall through to the existing renderer if an older Safari rejects a CSS feature.
+      }
+    }
     const dataUrl = await toPng(node, options);
     return await (await fetch(dataUrl)).blob();
   } finally {
