@@ -37,18 +37,30 @@ async function canvasToBlob(canvas: HTMLCanvasElement) {
 
 async function createSafariPng(node: HTMLElement, size: { width: number; height: number }) {
   const { default: html2canvas } = await import("html2canvas");
-  const canvas = await html2canvas(node, {
-    backgroundColor: null,
-    width: size.width,
-    height: size.height,
-    scale: 1,
-    useCORS: true,
-    allowTaint: false,
-    logging: false,
-    windowWidth: size.width,
-    windowHeight: size.height,
-  });
-  return canvasToBlob(canvas);
+  // The visible story sits inside a CSS-scaled preview. Safari's canvas
+  // renderer reads that transformed size, so capture a full-size off-screen
+  // clone instead of the preview itself.
+  const clone = node.cloneNode(true) as HTMLElement;
+  clone.removeAttribute("id");
+  clone.style.cssText += `;position:fixed;left:-12000px;top:0;width:${size.width}px;height:${size.height}px;transform:none;transform-origin:top left;`;
+  document.body.appendChild(clone);
+  try {
+    if (document.fonts?.ready) await document.fonts.ready;
+    const canvas = await html2canvas(clone, {
+      backgroundColor: null,
+      width: size.width,
+      height: size.height,
+      scale: 1,
+      useCORS: true,
+      allowTaint: false,
+      logging: false,
+      windowWidth: size.width,
+      windowHeight: size.height,
+    });
+    return canvasToBlob(canvas);
+  } finally {
+    clone.remove();
+  }
 }
 
 export async function createPngBlob(
