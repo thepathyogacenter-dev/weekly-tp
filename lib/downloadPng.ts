@@ -4,7 +4,7 @@ export async function createPngBlob(
   node: HTMLElement,
   size: { width: number; height: number }
 ) {
-  const dataUrl = await toPng(node, {
+  const options = {
     width: size.width,
     height: size.height,
     pixelRatio: 2,
@@ -14,7 +14,12 @@ export async function createPngBlob(
       width: `${size.width}px`,
       height: `${size.height}px`,
     },
-  });
+  };
+  // WebKit may return a blank first foreignObject render. Warming it once
+  // makes Safari exports match the on-screen canvas.
+  const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent);
+  if (isSafari) await toPng(node, options);
+  const dataUrl = await toPng(node, options);
   return await (await fetch(dataUrl)).blob();
 }
 
@@ -33,5 +38,6 @@ export async function downloadPng(
   link.download = filename;
   link.href = URL.createObjectURL(blob);
   link.click();
-  URL.revokeObjectURL(link.href);
+  // Safari can cancel a download if its object URL is released in the same task.
+  window.setTimeout(() => URL.revokeObjectURL(link.href), 1_000);
 }

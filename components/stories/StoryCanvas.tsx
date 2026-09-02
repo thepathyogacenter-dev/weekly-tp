@@ -31,6 +31,10 @@ export function StoryCanvas({
     if (!el) return;
     const compute = () => setScale(Math.min(el.clientWidth / width, 0.42));
     compute();
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", compute);
+      return () => window.removeEventListener("resize", compute);
+    }
     const ro = new ResizeObserver(compute);
     ro.observe(el);
     return () => ro.disconnect();
@@ -53,7 +57,8 @@ export function StoryCanvas({
     try {
       const blob = await createPngBlob(nodeRef.current, { width, height });
       const file = new File([blob], filename, { type: "image/png" });
-      if (navigator.canShare?.({ files: [file] })) {
+      const supportsFileShare = typeof navigator.canShare === "function" && navigator.canShare({ files: [file] });
+      if (supportsFileShare && typeof navigator.share === "function") {
         await navigator.share({ files: [file], title: label });
       } else if (navigator.clipboard && "ClipboardItem" in window) {
         await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);

@@ -53,8 +53,9 @@ export function StoryLibrary() {
     setSharing(entry.id);
     try {
       const blob = await (await fetch(entry.src)).blob(); const storyFile = new File([blob], entry.filename, { type: blob.type || "image/png" });
-      if (navigator.canShare?.({ files: [storyFile] })) await navigator.share({ files: [storyFile], title: entry.title });
-      else { const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = entry.filename; link.click(); URL.revokeObjectURL(link.href); }
+      const supportsFileShare = typeof navigator.canShare === "function" && navigator.canShare({ files: [storyFile] });
+      if (supportsFileShare && typeof navigator.share === "function") await navigator.share({ files: [storyFile], title: entry.title });
+      else { const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = entry.filename; link.click(); window.setTimeout(() => URL.revokeObjectURL(link.href), 1_000); }
     } finally { setSharing(null); }
   };
   const startEditing = (entry: LibraryEntry) => { setEditingId(entry.id); setEditingTitle(entry.title); setEditingState("idle"); };
