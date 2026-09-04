@@ -9,33 +9,27 @@ export async function readStoryLibrary(): Promise<StoryLibraryItem[]> {
     const { kv } = await import("@vercel/kv");
     const items = await kv.get<StoryLibraryItem[]>(KEY);
     return Array.isArray(items) ? items : [];
-  } catch {
-    return [];
-  }
+  } catch { return []; }
+}
+
+async function writeStoryLibrary(items: StoryLibraryItem[]): Promise<boolean> {
+  if (!overridesConfigured()) return false;
+  try { const { kv } = await import("@vercel/kv"); await kv.set(KEY, items); return true; } catch { return false; }
 }
 
 export async function addStoryLibraryItem(item: StoryLibraryItem): Promise<boolean> {
-  if (!overridesConfigured()) return false;
-  try {
-    const { kv } = await import("@vercel/kv");
-    const current = await readStoryLibrary();
-    await kv.set(KEY, [item, ...current]);
-    return true;
-  } catch {
-    return false;
-  }
+  return writeStoryLibrary([item, ...(await readStoryLibrary())]);
 }
 
 export async function updateStoryLibraryItem(item: StoryLibraryItem): Promise<boolean> {
-  if (!overridesConfigured()) return false;
-  try {
-    const { kv } = await import("@vercel/kv");
-    const current = await readStoryLibrary();
-    const index = current.findIndex((entry) => entry.id === item.id);
-    const next = index === -1 ? [item, ...current] : current.map((entry) => entry.id === item.id ? { ...entry, ...item } : entry);
-    await kv.set(KEY, next);
-    return true;
-  } catch {
-    return false;
-  }
+  const current = await readStoryLibrary();
+  const exists = current.some((entry) => entry.id === item.id);
+  return writeStoryLibrary(exists ? current.map((entry) => entry.id === item.id ? { ...entry, ...item } : entry) : [item, ...current]);
+}
+
+export async function deleteStoryLibraryItem(id: string, keepPlaceholder: boolean): Promise<boolean> {
+  const current = await readStoryLibrary();
+  const existing = current.find((item) => item.id === id);
+  const remaining = current.filter((item) => item.id !== id);
+  return writeStoryLibrary(keepPlaceholder ? [...remaining, { id, title: existing?.title ?? "", category: existing?.category, deleted: true }] : remaining);
 }

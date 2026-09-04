@@ -52,5 +52,9 @@ export interface SharedStoryDesign {
 export interface StoryLibraryItem {
   id: string;
   title: string;
+  /** Training name used to group reusable story designs. */
+  category?: string;
   image?: string;
+  /** Hides a bundled design without deleting its public asset. */
+  deleted?: boolean;
 }
