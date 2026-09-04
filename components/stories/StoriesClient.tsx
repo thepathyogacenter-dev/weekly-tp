@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { type CarouselPhotoItem, type ClassItem, type Day, type SchedulePayload, type SharedStoryDesign } from "@/lib/types";
+import { type ClassItem, type Day, type SchedulePayload, type SharedStoryDesign } from "@/lib/types";
 import {
   classesForDay,
   datesForWeek,
@@ -76,17 +76,6 @@ export function StoriesClient({
     [adminClasses]
   );
   const [eventImages, setEventImages] = useState<Record<string, string>>({});
-  const [carouselPhotos, setCarouselPhotos] = useState<CarouselPhotoItem[]>([]);
-  const [photoUploadState, setPhotoUploadState] = useState<"idle" | "uploading" | "error">("idle");
-
-  useEffect(() => {
-    let active = true;
-    fetch("/api/admin/carousel-photo-library", { cache: "no-store" })
-      .then((response) => response.ok ? response.json() : null)
-      .then((result) => { if (active) setCarouselPhotos(Array.isArray(result?.photos) ? result.photos : []); })
-      .catch(() => undefined);
-    return () => { active = false; };
-  }, []);
 
   useEffect(() => {
     lastSharedClasses.current = data.classes;
@@ -271,38 +260,6 @@ export function StoriesClient({
     }
   };
 
-  const linkLibraryPhoto = async (eventId: string, image: string) => {
-    savingRef.current = true;
-    setSyncState("saving");
-    try {
-      const response = await fetch("/api/admin/story-image", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ week: weekKey, event: eventId, image }) });
-      const result = await response.json().catch(() => null);
-      if (!response.ok || !result?.ok) throw new Error("Shared image save failed");
-      setEventImages((current) => ({ ...current, [eventId]: image }));
-      savingRef.current = false;
-      setSyncState("saved");
-    } catch { savingRef.current = false; setSyncState("error"); }
-  };
-
-  const addCarouselPhoto = async (file: File | undefined) => {
-    if (!file) return;
-    setPhotoUploadState("uploading");
-    try {
-      const image = await prepareSharedStoryImage(file);
-      const name = file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim() || "Workshop photo";
-      const response = await fetch("/api/admin/carousel-photo-library", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, image }) });
-      const result = await response.json().catch(() => null);
-      if (!response.ok || !result?.photo) throw new Error("Photo upload failed");
-      setCarouselPhotos((current) => [result.photo, ...current]);
-      setPhotoUploadState("idle");
-    } catch { setPhotoUploadState("error"); }
-  };
-
-  const removeCarouselPhoto = async (id: string) => {
-    const response = await fetch("/api/admin/carousel-photo-library", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
-    if (response.ok) setCarouselPhotos((current) => current.filter((photo) => photo.id !== id));
-  };
-
   return (
     <main className="stories-shell">
       <header className="stories-head">
@@ -367,22 +324,16 @@ export function StoriesClient({
             <div>
               <p className="stories-panel-label">Weekly Instagram posts</p>
               <h2 id="carousel-admin-title">Workshops & events carousel</h2>
-              <p>Upload reusable workshop photos once, then choose one for any carousel event. The selected image is shared across every admin and used on the matching weekly story too.</p>
+              <p>Upload an image for each event. Every upload is shared across admins and used in the matching weekly story too.</p>
             </div>
-            <section className="carousel-photo-library" aria-labelledby="carousel-photo-library-title">
-              <div className="carousel-photo-library-head"><h3 id="carousel-photo-library-title">Photo library</h3><label className="carousel-photo-upload">{photoUploadState === "uploading" ? "Adding photo…" : "Add photo"}<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => addCarouselPhoto(event.target.files?.[0])} /></label></div>
-              {photoUploadState === "error" && <p className="stories-source-note" role="status">Could not add this photo. Try another image.</p>}
-              {carouselPhotos.length ? <div className="carousel-photo-grid">{carouselPhotos.map((photo) => <article key={photo.id}><img src={photo.image} alt={photo.name} /><div><strong>{photo.name}</strong><button type="button" onClick={() => removeCarouselPhoto(photo.id)}>Delete</button></div></article>)}</div> : <p className="carousel-photo-empty">No reusable photos yet. Add one above, then select it for an event below.</p>}
-            </section>
             <div className="weekly-events-upload-list">
               {weeklyEvents.map((event) => (
-                <div className="weekly-events-upload" key={`carousel-upload-${event.id}`}>
+                <label className="weekly-events-upload" key={`carousel-upload-${event.id}`}>
                   <span>{event.tag === "EVENT" ? "E" : "W"}</span>
                   <strong>{event.name}</strong>
-                  <label>Upload new<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => uploadEventImage(event.id, e.target.files?.[0])} /></label>
-                  <label>Choose from photo library<select defaultValue="" onChange={(e) => { const photo = carouselPhotos.find((item) => item.id === e.target.value); if (photo) void linkLibraryPhoto(event.id, photo.image); e.currentTarget.value = ""; }}><option value="">Select a photo</option>{carouselPhotos.map((photo) => <option key={photo.id} value={photo.id}>{photo.name}</option>)}</select></label>
-                  <em>{eventImages[event.id] ? "Image linked to post" : "Select or upload image"}</em>
-                </div>
+                  <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => uploadEventImage(event.id, e.target.files?.[0])} />
+                  <em>{eventImages[event.id] ? "Image linked to post" : "Upload image for post"}</em>
+                </label>
               ))}
             </div>
           </section>

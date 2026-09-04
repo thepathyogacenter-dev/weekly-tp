@@ -903,20 +903,3 @@
 .story-library-card-edit label { grid-column: 1 / -1; }
 @media (max-width: 900px) { .story-library-upload { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .story-library-card h4 { min-height: 48px; padding: 9px 9px 7px; font-size: 11px; } .story-library-card > div { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-
-/* Shared workshop images for the weekly carousel. */
-.carousel-photo-library { margin: 22px 0; padding: 16px; border: 1px solid var(--hair); border-radius: 4px; background: rgba(255,255,255,.28); }
-.carousel-photo-library-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.carousel-photo-library h3 { margin: 0; font-size: 16px; text-transform: uppercase; }
-.carousel-photo-upload { display: inline-grid; place-items: center; min-height: 34px; padding: 0 11px; border: 1px solid var(--ink); border-radius: 3px; background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
-.carousel-photo-upload input { position: absolute; inline-size: 1px; block-size: 1px; opacity: 0; pointer-events: none; }
-.carousel-photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 10px; margin-top: 14px; }
-.carousel-photo-grid article { overflow: hidden; border: 1px solid var(--hair); border-radius: 4px; background: var(--paper); }
-.carousel-photo-grid img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
-.carousel-photo-grid article > div { display: flex; align-items: center; justify-content: space-between; gap: 5px; padding: 7px; }
-.carousel-photo-grid strong { overflow: hidden; font-family: var(--mono); font-size: 8px; letter-spacing: .03em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
-.carousel-photo-grid button { flex: 0 0 auto; border: 0; background: transparent; color: var(--rust); font-family: var(--mono); font-size: 8px; font-weight: 700; text-transform: uppercase; cursor: pointer; }
-.carousel-photo-empty { margin: 12px 0 0; color: var(--muted); font-size: 13px; }
-.weekly-events-upload label { grid-column: 1 / -1; display: grid; gap: 4px; font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
-.weekly-events-upload label input, .weekly-events-upload label select { width: 100%; min-width: 0; min-height: 32px; box-sizing: border-box; border: 1px solid var(--hair); border-radius: 3px; background: #fff; color: var(--ink); font: 12px var(--story-font); text-transform: none; }
-@media (max-width: 520px) { .carousel-photo-library-head { align-items: flex-start; flex-direction: column; } .carousel-photo-upload { width: 100%; } }

@@ -49,12 +49,6 @@ export interface SharedStoryDesign {
   eventImagePositions?: Record<string, number>;
 }
 
-export interface CarouselPhotoItem {
-  id: string;
-  name: string;
-  image: string;
-}
-
 export interface StoryLibraryItem {
   id: string;
   title: string;
