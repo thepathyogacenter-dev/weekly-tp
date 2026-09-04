@@ -65,7 +65,7 @@ function teachersFor(session: MomenceSession): string[] {
 /** Momence's public feed has no Event/Workshop field, so label the known special formats here. */
 function tagForSession(name: string): ClassItem["tag"] {
   if (/\b(?:men|women)['’]?s circle\b/i.test(name)) return "EVENT";
-  if (/workshop|ceremony|sound healing|somatic|return to self|thai yoga massage|meditate\.?\s*heal\.?\s*transform/i.test(name)) {
+  if (/workshop|ceremony|sound healing|somatic|return to self|rest\s*,?\s*reset\s*(?:,|and)\s*reconnect|thai yoga massage|meditate\.?\s*heal\.?\s*transform/i.test(name)) {
     return "WORKSHOP";
   }
   return null;
