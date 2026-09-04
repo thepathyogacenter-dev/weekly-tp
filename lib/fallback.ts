@@ -1,7 +1,6 @@
 /**
- * Salinan tab "Fix Schedule" per 23 Juli 2026.
- * Dipakai kalau SCHEDULE_CSV_URL kosong atau Sheet-nya nggak bisa diambil.
- * Struktur harus sama persis dengan Sheet: baris 1 hari, baris 2 ruang.
+ * Emergency snapshot used only when Momence is temporarily unavailable.
+ * The row structure is retained solely to render that offline snapshot.
  */
 export const FALLBACK_ROWS: string[][] = [
   ["MONDAY","","","TUESDAY","","","WEDNESDAY","","","THURSDAY","","","FRIDAY","","","SATURDAY","","","SUNDAY","",""],
@@ -17,9 +16,8 @@ export const FALLBACK_ROWS: string[][] = [
 ];
 
 /**
- * Foto guru. Key harus sama persis dengan nama di Sheet.
- * Kosongkan untuk pakai lingkaran inisial.
- * Kalau TEACHERS_CSV_URL diisi, data dari sana menimpa yang di sini.
+ * Teacher photos keyed by display name.
+ * Leave empty to use initials; TEACHERS_CSV_URL may optionally provide photos.
  */
 export const TEACHER_PHOTOS: Record<string, string> = {
   // Meli: "https://cdn.prod.website-files.com/.../meli.jpg",

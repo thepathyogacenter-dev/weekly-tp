@@ -2,9 +2,8 @@ import { DAYS, SPACES, type ClassItem, type Day, type Space } from "./types";
 
 /**
  * Berapa baris jadwal pertama yang dianggap pagi.
- * Google Sheet nggak menyimpan AM/PM, jadi jam 7-11 ditebak dari posisi baris.
- * Kalau kamu ubah urutan baris di Sheet, angka ini ikut berubah.
- * Solusi permanen: tulis jam 24 jam di Sheet, misal "19.00 - 20.30".
+ * The offline snapshot does not store AM/PM, so 7–11 is inferred from row order.
+ * Keep its rows ordered by time, or use 24-hour times such as "19.00 - 20.30".
  */
 export const MORNING_ROWS = 3;
 

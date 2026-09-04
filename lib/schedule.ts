@@ -1,58 +1,13 @@
 import { parseCsv } from "./csv";
 import { buildSchedule } from "./parse";
-import { fetchMonthlyWeek, fetchWeeklyBackgroundImage } from "./monthSchedule";
 import { getMomenceWeek } from "./momence";
 import { readOverrides } from "./scheduleStore";
 import { datesForWeek } from "./stories";
 import { FALLBACK_ROWS, TEACHER_PHOTOS } from "./fallback";
 import type { ClassItem, SchedulePayload } from "./types";
 
-export const REVALIDATE = 300; // detik
-const TZ = "Asia/Makassar"; // WITA — Bali
-
-/** Normalisasi nama kelas biar Momence & Sheet bisa dicocokkan: buang penanda
- *  Event/Workshop dari Sheet ("E - ", "W - ") lalu sisakan huruf/angka saja. */
-function normalizeName(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/^[ew]\s*[-–—]\s*/i, "")
-    .replace(/[^a-z0-9]+/g, "");
-}
-
-/**
- * Cocokkan kelas Momence & Sheet lewat hari + nama ternormalisasi. Ruang sengaja
- * diabaikan: Momence menaruh workshop di INDOOR sementara Sheet pakai SHALA 3, jadi
- * kalau ikut ruang, workshop yang sama muncul dobel.
- */
-function classKey(item: ClassItem): string {
-  return `${item.day}|${normalizeName(item.name)}`;
-}
-
-function teacherKey(name: string): string {
-  return name.toLowerCase().replace(/\s+/g, " ").replace(/\s*\.\s*$/, "").trim();
-}
-
-function isCoveredByMomence(item: ClassItem, momence: ClassItem[]): boolean {
-  if (momence.some((momenceItem) => classKey(momenceItem) === classKey(item))) return true;
-  if (item.start === null) return false;
-
-  return momence.some(
-    (momenceItem) =>
-      momenceItem.day === item.day &&
-      momenceItem.start === item.start &&
-      momenceItem.teachers.some((teacher) => item.teachers.some((sheetTeacher) => teacherKey(teacher) === teacherKey(sheetTeacher)))
-  );
-}
-
-/**
- * Momence adalah sumber jadwal guru. Sheet hanya boleh melengkapi workshop/event yang
- * secara eksplisit ditandai, karena kelas reguler yang masih tersisa di Sheet bisa
- * saja sudah diubah atau dibatalkan di Momence.
- */
-function mergeMomenceWithSheet(momence: ClassItem[], sheet: ClassItem[]): ClassItem[] {
-  const extras = sheet.filter((item) => item.tag !== null && !isCoveredByMomence(item, momence));
-  return [...momence, ...extras];
-}
+export const REVALIDATE = 300;
+const TZ = "Asia/Makassar";
 
 async function fetchCsv(url: string): Promise<string[][] | null> {
   try {
@@ -68,70 +23,38 @@ async function fetchCsv(url: string): Promise<string[][] | null> {
 async function fetchTeacherPhotos(url: string): Promise<Record<string, string>> {
   const rows = await fetchCsv(url);
   if (!rows || rows.length < 2) return {};
-
   const header = rows[0].map((h) => h.trim().toLowerCase());
   const nameCol = header.indexOf("name");
   const photoCol = header.indexOf("photo");
   if (nameCol === -1 || photoCol === -1) return {};
-
-  const out: Record<string, string> = {};
+  const photos: Record<string, string> = {};
   for (const row of rows.slice(1)) {
     const name = (row[nameCol] ?? "").trim();
     const photo = (row[photoCol] ?? "").trim();
-    if (name && /^https?:\/\//.test(photo)) out[name] = photo;
+    if (name && /^https?:\/\//.test(photo)) photos[name] = photo;
   }
-  return out;
+  return photos;
 }
 
 export async function getSchedule(): Promise<SchedulePayload> {
-  const teachersUrl = process.env.TEACHERS_CSV_URL;
-  const apiKey = process.env.GOOGLE_SHEETS_API_KEY;
-  const sheetId = process.env.SCHEDULE_SHEET_ID;
-
-  // Sumber utama: Momence (booking system) untuk minggu berjalan — data live yang
-  // selalu up-to-date dan menang untuk kelas reguler. Google Sheet (monthly calendar
-  // via Sheets API, punya warna cell untuk badge workshop) di-merge untuk menambah
-  // entri yang belum ada di Momence, mis. workshop/training seperti "Yin YTT".
-  // Kalau Momence tidak bisa diakses, pakai Sheet penuh; kalau dua-duanya gagal, snapshot.
-  // Minggu yang diambil = Senin–Minggu, sama dengan yang dipakai UI.
   const week = datesForWeek(TZ);
   const weekKey = week.MONDAY.toISOString().slice(0, 10);
-  const momencePromise = getMomenceWeek();
-  const sheetClassesPromise = apiKey && sheetId ? fetchMonthlyWeek(apiKey, sheetId, week) : Promise.resolve(null);
-  const sharedOverridesPromise = readOverrides(weekKey);
-  const weeklyImagePromise = apiKey && sheetId
-    ? fetchWeeklyBackgroundImage(apiKey, sheetId, week.MONDAY)
-    : Promise.resolve(null);
-  const photosPromise = teachersUrl ? fetchTeacherPhotos(teachersUrl) : Promise.resolve({});
-  const [momenceClasses, sheetClasses, sharedOverrides, sheetPhotos, weeklyBackgroundImage] = await Promise.all([
-    momencePromise,
-    sheetClassesPromise,
-    sharedOverridesPromise,
-    photosPromise,
-    weeklyImagePromise,
+  const teachersUrl = process.env.TEACHERS_CSV_URL;
+  const [momenceClasses, sharedOverrides, teacherPhotos] = await Promise.all([
+    getMomenceWeek(),
+    readOverrides(weekKey),
+    teachersUrl ? fetchTeacherPhotos(teachersUrl) : Promise.resolve({}),
   ]);
 
-  let classes: ClassItem[] | null;
-  let source: SchedulePayload["source"];
-  if (momenceClasses) {
-    classes = sheetClasses ? mergeMomenceWithSheet(momenceClasses, sheetClasses) : momenceClasses;
-    source = "momence";
-  } else if (sheetClasses) {
-    classes = sheetClasses;
-    source = "sheet";
-  } else {
-    classes = null;
-    source = "fallback";
-  }
+  const classes: ClassItem[] = sharedOverrides?.length
+    ? sharedOverrides
+    : momenceClasses ?? buildSchedule(FALLBACK_ROWS);
 
   return {
-    classes: sharedOverrides?.length ? sharedOverrides : classes ?? buildSchedule(FALLBACK_ROWS),
-    teacherPhotos: {
-      ...TEACHER_PHOTOS,
-      ...sheetPhotos,
-    },
-    weeklyBackgroundImage,
-    source,
+    classes,
+    teacherPhotos: { ...TEACHER_PHOTOS, ...teacherPhotos },
+    weeklyBackgroundImage: null,
+    source: momenceClasses ? "momence" : "fallback",
     fetchedAt: new Date().toISOString(),
   };
 }

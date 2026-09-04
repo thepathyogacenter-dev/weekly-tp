@@ -50,7 +50,7 @@ export function ScheduleBoard({
   }, []);
 
   // Re-fetch the server-rendered data on the studio's cadence so an
-  // open tab (e.g. a kiosk display) picks up Sheet edits without a manual reload.
+  // open tab (e.g. a kiosk display) picks up Momence updates without a manual reload.
   useEffect(() => {
     const id = setInterval(() => router.refresh(), revalidateSeconds * 1000);
     const onVisible = () => {

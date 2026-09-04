@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 export default async function StoriesPage() {
-  // Satu sumber untuk semua post: schedule (Momence + merge Sheet). Daily, Weekly,
+  // Satu sumber untuk semua post: schedule Momence. Daily, Weekly,
   // Carousel, dan bulletin semuanya dialiri lewat Schedule Editor di client.
   const data = await getSchedule();
   const tomorrow = tomorrowInTimeZone("Asia/Makassar");

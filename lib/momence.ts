@@ -123,7 +123,7 @@ function toClassItems(sessions: MomenceSession[]): ClassItem[] {
  * Every Instagram post (Daily, Weekly, Carousel, bulletin) is fed from this one
  * source: Momence's live schedule for the current Monday–Sunday week (the same
  * window the UI renders). Returns null when Momence is unreachable so callers
- * can fall back to the published Google Sheet.
+ * can fall back to the local emergency snapshot.
  */
 export async function getMomenceWeek(): Promise<ClassItem[] | null> {
   const hostId = process.env.MOMENCE_HOST_ID ?? "14607";

@@ -8,7 +8,7 @@ export function Avatar({ name, photo }: { name: string; photo?: string }) {
   if (photo) {
     return (
       <span className="avatar">
-        {/* img biasa, bukan next/image: URL-nya datang dari Google Sheet dan bisa domain apa saja */}
+        {/* Standard img supports optional photo URLs from the shared photo source. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={photo} alt={name} loading="lazy" />
       </span>

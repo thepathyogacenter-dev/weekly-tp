@@ -43,7 +43,7 @@ export function StoriesClient({
 
   const week = useMemo(() => datesForWeek(TZ), []);
   // Semua post Instagram (termasuk Daily) ambil dari Schedule Editor (adminClasses),
-  // yang berbasis Momence + merge Sheet + override manual. Daily = kelas hari besok.
+  // yang berbasis Momence + override manual. Daily = kelas hari besok.
   const { outdoor, indoor } = useMemo(
     () => splitBySpace(classesForDay(adminClasses, dailyDay)),
     [adminClasses, dailyDay]
