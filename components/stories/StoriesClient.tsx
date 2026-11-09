@@ -173,16 +173,25 @@ export function StoriesClient({
   useEffect(() => {
     let active = true;
     const refreshSharedCanvas = async () => {
-      if (savingRef.current) return;
+      // Tab tersembunyi atau sedang menyimpan: jangan poll.
+      if (savingRef.current || document.hidden) return;
       try {
         const response = await fetch(`/api/admin/schedule?week=${weekKey}`, { cache: "no-store" });
         const result = await response.json();
         if (!active) return;
-        if (Array.isArray(result?.classes)) {
+        // Update state hanya kalau datanya benar-benar berubah.
+        if (
+          Array.isArray(result?.classes) &&
+          JSON.stringify(result.classes) !== JSON.stringify(lastSharedClasses.current)
+        ) {
           lastSharedClasses.current = result.classes;
           setAdminClasses(result.classes);
         }
-        if (result?.design && typeof result.design === "object") {
+        if (
+          result?.design &&
+          typeof result.design === "object" &&
+          JSON.stringify(result.design) !== JSON.stringify(lastSharedDesign.current)
+        ) {
           storyDesignRef.current = result.design;
           lastSharedDesign.current = result.design;
           setStoryDesign(result.design);
@@ -191,23 +200,34 @@ export function StoriesClient({
         // Retain the last confirmed shared version while offline.
       }
     };
+    const onVisible = () => {
+      if (!document.hidden) void refreshSharedCanvas();
+    };
     void refreshSharedCanvas();
     const timer = window.setInterval(refreshSharedCanvas, 10_000);
-    return () => { active = false; window.clearInterval(timer); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [weekKey]);
 
+  // Gambar event hanya di-fetch ulang kalau daftar event berubah, bukan tiap poll.
+  const eventIdsKey = JSON.stringify(weeklyEvents.map((event) => event.id));
   useEffect(() => {
     let active = true;
-    Promise.all(weeklyEvents.map(async (event) => {
-      const response = await fetch(`/api/admin/story-image?week=${weekKey}&event=${encodeURIComponent(event.id)}`, { cache: "no-store" });
+    const ids: string[] = JSON.parse(eventIdsKey);
+    Promise.all(ids.map(async (id) => {
+      const response = await fetch(`/api/admin/story-image?week=${weekKey}&event=${encodeURIComponent(id)}`, { cache: "no-store" });
       const result = response.ok ? await response.json() : null;
-      return [event.id, result?.image] as const;
+      return [id, result?.image] as const;
     })).then((items) => {
       if (!active) return;
       setEventImages(Object.fromEntries(items.filter(([, image]) => typeof image === "string")));
     }).catch(() => undefined);
     return () => { active = false; };
-  }, [weekKey, weeklyEvents]);
+  }, [weekKey, eventIdsKey]);
 
 
   const updateStoryDesign = (patch: Partial<SharedStoryDesign>) => {
