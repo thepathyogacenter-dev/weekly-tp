@@ -59,7 +59,7 @@ export function WeeklyEventsTemplate({
 }) {
   return (
     <section className="weekly-events-poster" data-event-count={events.length}>
-      <img className="weekly-events-background" src={backgroundImageUrl ?? "/stories/weekly-bg.png"} alt="" />
+      <img className="weekly-events-background" src={backgroundImageUrl ?? "/stories/weekly-bg.jpg"} alt="" />
       <div className="weekly-events-overlay" />
       <header className="weekly-events-header">
         <img src="/stories/weekly-schedule-logo.png" alt="The Path" />
