@@ -1,7 +1,37 @@
 "use client";
 
+import { useLayoutEffect, useRef } from "react";
 import type { ClassItem, Day } from "@/lib/types";
 import { titleCase } from "@/lib/stories";
+
+const MIN_SCALE = 0.6;
+const FOOTER_GAP = 24;
+
+/**
+ * Kecilkan baris jadwal (font + jarak) sampai kedua kolom muat di panel.
+ * Kolom kiri sampai bawah panel, kolom kanan sampai di atas logo/footer.
+ */
+function fitPoster(panel: HTMLElement) {
+  const grid = panel.querySelector<HTMLElement>(".weekly-poster-grid");
+  const footer = panel.querySelector<HTMLElement>(".weekly-poster-footer");
+  if (!grid || !footer) return;
+  const [left, right] = Array.from(grid.children) as HTMLElement[];
+  const paddingBottom = parseFloat(getComputedStyle(panel).paddingBottom) || 0;
+
+  const overflows = () => {
+    const top = grid.offsetTop;
+    const leftAvail = panel.clientHeight - paddingBottom - top;
+    const rightAvail = footer.offsetTop - FOOTER_GAP - top;
+    return (left?.offsetHeight ?? 0) > leftAvail || (right?.offsetHeight ?? 0) > rightAvail;
+  };
+
+  let scale = 1;
+  panel.style.setProperty("--wp-s", "1");
+  while (overflows() && scale > MIN_SCALE) {
+    scale = Math.round((scale - 0.02) * 100) / 100;
+    panel.style.setProperty("--wp-s", String(scale));
+  }
+}
 
 const DAY_COLUMNS: Day[][] = [
   ["MONDAY", "WEDNESDAY", "FRIDAY", "SUNDAY"],
@@ -47,6 +77,21 @@ export function WeeklyStoryTemplate({
 }) {
   const defaultTitle = shala === "outdoor" ? "Outdoor Shala Schedule" : "Indoor Shala Schedule";
   const posterTitle = title || defaultTitle;
+  const panelRef = useRef<HTMLElement>(null);
+
+  // Hitung ulang tiap render (jadwal/judul berubah) dan setelah font selesai dimuat.
+  useLayoutEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    fitPoster(panel);
+    let active = true;
+    void document.fonts?.ready.then(() => {
+      if (active) fitPoster(panel);
+    });
+    return () => {
+      active = false;
+    };
+  });
 
   return (
     <>
@@ -62,7 +107,7 @@ export function WeeklyStoryTemplate({
       />
       <div className="weekly-poster-overlay" />
 
-      <section className="weekly-poster-panel">
+      <section className="weekly-poster-panel" ref={panelRef}>
         <h1 className={`weekly-poster-title${editable ? " story-canvas-editable" : ""}`} contentEditable={editable} suppressContentEditableWarning onBlur={(event) => onTitleChange?.(event.currentTarget.textContent?.trim() || defaultTitle)}>{posterTitle}</h1>
         <div className="weekly-poster-range">{dateRangeLabel}</div>
 
