@@ -214,12 +214,12 @@ export function StoriesClient({
   }, [weekKey]);
 
   // Gambar event hanya di-fetch ulang kalau daftar event berubah, bukan tiap poll.
-  const eventIdsKey = JSON.stringify(weeklyEvents.map((event) => event.id));
+  const eventIdsKey = JSON.stringify(weeklyEvents.map((event) => [event.id, event.name]));
   useEffect(() => {
     let active = true;
-    const ids: string[] = JSON.parse(eventIdsKey);
-    Promise.all(ids.map(async (id) => {
-      const response = await fetch(`/api/admin/story-image?week=${weekKey}&event=${encodeURIComponent(id)}`, { cache: "no-store" });
+    const pairs: [string, string][] = JSON.parse(eventIdsKey);
+    Promise.all(pairs.map(async ([id, name]) => {
+      const response = await fetch(`/api/admin/story-image?week=${weekKey}&event=${encodeURIComponent(id)}&name=${encodeURIComponent(name)}`, { cache: "no-store" });
       const result = response.ok ? await response.json() : null;
       return [id, result?.image] as const;
     })).then((items) => {
@@ -307,7 +307,12 @@ export function StoriesClient({
       const response = await fetch("/api/admin/story-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ week: weekKey, event: eventId, image }),
+        body: JSON.stringify({
+          week: weekKey,
+          event: eventId,
+          name: weeklyEvents.find((event) => event.id === eventId)?.name ?? "",
+          image,
+        }),
       });
       const result = await response.json().catch(() => null);
       if (!response.ok || !result?.ok) throw new Error("Shared image save failed");

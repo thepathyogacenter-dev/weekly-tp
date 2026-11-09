@@ -80,21 +80,40 @@ export async function writeStoryDesign(weekKey: string, design: SharedStoryDesig
   }
 }
 
-export async function readStoryImage(weekKey: string, eventId: string): Promise<string | null> {
+// Foto terakhir per nama event, dipakai ulang otomatis di minggu-minggu berikutnya.
+const STORY_IMAGE_NAME_PREFIX = "story-image-name:";
+
+function eventNameKey(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+/** Urutan: foto khusus minggu ini → foto terakhir untuk nama event yang sama → null (default). */
+export async function readStoryImage(weekKey: string, eventId: string, eventName?: string): Promise<string | null> {
   if (!overridesConfigured()) return null;
   try {
     const { kv } = await import("@vercel/kv");
-    return await kv.get<string>(`${STORY_IMAGE_PREFIX}${weekKey}:${eventId}`);
+    const nameKey = eventName ? eventNameKey(eventName) : "";
+    const weekly = await kv.get<string>(`${STORY_IMAGE_PREFIX}${weekKey}:${eventId}`);
+    if (weekly) {
+      // Foto lama (sebelum fitur ini) ikut diingat, tanpa menimpa yang sudah ada.
+      if (nameKey) await kv.set(`${STORY_IMAGE_NAME_PREFIX}${nameKey}`, weekly, { nx: true }).catch(() => null);
+      return weekly;
+    }
+    return nameKey ? await kv.get<string>(`${STORY_IMAGE_NAME_PREFIX}${nameKey}`) : null;
   } catch {
     return null;
   }
 }
 
-export async function writeStoryImage(weekKey: string, eventId: string, image: string): Promise<boolean> {
+export async function writeStoryImage(weekKey: string, eventId: string, image: string, eventName?: string): Promise<boolean> {
   if (!overridesConfigured()) return false;
   try {
     const { kv } = await import("@vercel/kv");
-    await kv.set(`${STORY_IMAGE_PREFIX}${weekKey}:${eventId}`, image);
+    const nameKey = eventName ? eventNameKey(eventName) : "";
+    await Promise.all([
+      kv.set(`${STORY_IMAGE_PREFIX}${weekKey}:${eventId}`, image),
+      nameKey ? kv.set(`${STORY_IMAGE_NAME_PREFIX}${nameKey}`, image) : Promise.resolve(),
+    ]);
     return true;
   } catch {
     return false;
