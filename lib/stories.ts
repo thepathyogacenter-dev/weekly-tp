@@ -119,20 +119,30 @@ export function formatDateLabel(date: Date, tz: string): string {
     .toUpperCase();
 }
 
+/** Minggu Senin–Minggu yang berisi tanggal ini. `date` = hasil calendarDateInTimeZone (UTC midnight). */
+export function weekContaining(date: Date): Record<Day, Date> {
+  const dayIndex = (date.getUTCDay() + 6) % 7; // Senin = 0, Minggu = 6
+  const monday = addCalendarDays(date, -dayIndex);
+  const out = {} as Record<Day, Date>;
+  DAYS.forEach((day, i) => {
+    out[day] = addCalendarDays(monday, i);
+  });
+  return out;
+}
+
+/** Key penyimpanan per minggu, contoh "2026-11-09". */
+export function weekKeyOf(week: Record<Day, Date>): string {
+  return week.MONDAY.toISOString().slice(0, 10);
+}
+
 /**
  * Dates for the current Monday-Sunday week, except from Friday onward when the
  * upcoming week is prepared for the studio's weekly publishing workflow.
  */
 export function datesForWeek(tz: string, now = new Date()): Record<Day, Date> {
   const today = calendarDateInTimeZone(tz, now);
-  const dayIndex = DAYS.indexOf(dayInTimeZone(tz, now));
-  const isFridayOrLater = dayIndex >= DAYS.indexOf("FRIDAY");
-  const monday = addCalendarDays(today, -dayIndex + (isFridayOrLater ? 7 : 0));
-  const out = {} as Record<Day, Date>;
-  DAYS.forEach((day, i) => {
-    out[day] = addCalendarDays(monday, i);
-  });
-  return out;
+  const isFridayOrLater = (today.getUTCDay() + 6) % 7 >= DAYS.indexOf("FRIDAY");
+  return weekContaining(isFridayOrLater ? addCalendarDays(today, 7) : today);
 }
 
 export function weekRangeLabel(days: Day[], week: Record<Day, Date>, tz: string): string {

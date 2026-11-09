@@ -25,11 +25,15 @@ const TZ = "Asia/Makassar";
 
 export function StoriesClient({
   data,
+  dailyClasses,
+  dailyWeekKey,
   dailyDay,
   dailyDate,
   momenceAvailable,
 }: {
   data: SchedulePayload;
+  dailyClasses: ClassItem[];
+  dailyWeekKey: string;
   dailyDay: Day;
   dailyDate: string;
   momenceAvailable: boolean;
@@ -42,14 +46,21 @@ export function StoriesClient({
   const [storyDesign, setStoryDesign] = useState<SharedStoryDesign>({});
 
   const week = useMemo(() => datesForWeek(TZ), []);
-  // Semua post Instagram (termasuk Daily) ambil dari Schedule Editor (adminClasses),
-  // yang berbasis Momence + override manual. Daily = kelas hari besok.
+  const weekKey = week.MONDAY.toISOString().slice(0, 10);
+
+  // Senin–Kamis & Minggu: Daily ikut Schedule Editor (adminClasses), sama seperti sebelumnya.
+  // Jumat & Sabtu: editor sudah di minggu depan, Daily butuh minggu ini, jadi pakai state terpisah.
+  const dailySeparate = dailyWeekKey !== weekKey;
+  const [dailyOnly, setDailyOnly] = useState<ClassItem[]>(dailyClasses);
+  const lastDailyShared = useRef<ClassItem[]>(dailyClasses);
+  const dailySaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dailySource = dailySeparate ? dailyOnly : adminClasses;
+
   const { outdoor, indoor } = useMemo(
-    () => splitBySpace(classesForDay(adminClasses, dailyDay)),
-    [adminClasses, dailyDay]
+    () => splitBySpace(classesForDay(dailySource, dailyDay)),
+    [dailySource, dailyDay]
   );
   const dateLabel = formatDateLabel(new Date(dailyDate), TZ);
-  const weekKey = week.MONDAY.toISOString().slice(0, 10);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const designSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSharedClasses = useRef<ClassItem[]>(data.classes);
@@ -126,7 +137,36 @@ export function StoriesClient({
   };
 
   const updateDailyClass = (id: string, patch: { name?: string; teachers?: string[]; timeLabel?: string }) => {
-    applyChange(adminClasses.map((classItem) => classItem.id === id ? { ...classItem, ...patch } : classItem));
+    const patchList = (list: ClassItem[]) =>
+      list.map((classItem) => (classItem.id === id ? { ...classItem, ...patch } : classItem));
+
+    // Daily di minggu yang sama dengan editor: simpan lewat jalur biasa.
+    if (!dailySeparate) {
+      applyChange(patchList(adminClasses));
+      return;
+    }
+
+    // Jumat & Sabtu: simpan ke minggu Daily, bukan minggu editor.
+    const next = patchList(dailyOnly);
+    setDailyOnly(next);
+    setSyncState("saving");
+    if (dailySaveTimer.current) clearTimeout(dailySaveTimer.current);
+    dailySaveTimer.current = setTimeout(async () => {
+      try {
+        const response = await fetch("/api/admin/schedule", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ week: dailyWeekKey, classes: next }),
+        });
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result?.ok) throw new Error("Daily save failed");
+        lastDailyShared.current = next;
+        setSyncState("saved");
+      } catch {
+        setDailyOnly(lastDailyShared.current);
+        setSyncState("error");
+      }
+    }, 600);
   };
 
   // Keep already-open admin pages aligned with shared edits from another device.

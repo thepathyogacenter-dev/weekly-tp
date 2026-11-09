@@ -125,9 +125,8 @@ function toClassItems(sessions: MomenceSession[]): ClassItem[] {
  * window the UI renders). Returns null when Momence is unreachable so callers
  * can fall back to the local emergency snapshot.
  */
-export async function getMomenceWeek(): Promise<ClassItem[] | null> {
+export async function getMomenceWeek(week: Record<Day, Date> = datesForWeek(TZ)): Promise<ClassItem[] | null> {
   const hostId = process.env.MOMENCE_HOST_ID ?? "14607";
-  const week = datesForWeek(TZ);
   const monday = week[DAYS[0]];
   const dayAfterSunday = new Date(week[DAYS[DAYS.length - 1]]);
   dayAfterSunday.setUTCDate(dayAfterSunday.getUTCDate() + 1);

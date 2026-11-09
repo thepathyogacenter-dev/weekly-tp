@@ -4,7 +4,7 @@ import { getMomenceWeek } from "./momence";
 import { readOverrides } from "./scheduleStore";
 import { datesForWeek } from "./stories";
 import { FALLBACK_ROWS, TEACHER_PHOTOS } from "./fallback";
-import type { ClassItem, SchedulePayload } from "./types";
+import type { ClassItem, Day, SchedulePayload } from "./types";
 
 export const REVALIDATE = 300;
 const TZ = "Asia/Makassar";
@@ -36,12 +36,11 @@ async function fetchTeacherPhotos(url: string): Promise<Record<string, string>> 
   return photos;
 }
 
-export async function getSchedule(): Promise<SchedulePayload> {
-  const week = datesForWeek(TZ);
+export async function getSchedule(week: Record<Day, Date> = datesForWeek(TZ)): Promise<SchedulePayload> {
   const weekKey = week.MONDAY.toISOString().slice(0, 10);
   const teachersUrl = process.env.TEACHERS_CSV_URL;
   const [momenceClasses, sharedOverrides, teacherPhotos] = await Promise.all([
-    getMomenceWeek(),
+    getMomenceWeek(week),
     readOverrides(weekKey),
     teachersUrl ? fetchTeacherPhotos(teachersUrl) : Promise.resolve({}),
   ]);
