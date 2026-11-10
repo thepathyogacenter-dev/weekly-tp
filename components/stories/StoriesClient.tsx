@@ -354,7 +354,7 @@ export function StoriesClient({
               <StoryCanvas filename="weekly-workshops-events-cover.png" label="Weekly posts carousel cover" width={1080} height={1350} canvasId="weekly-carousel-cover" hideActions>
                 <CarouselCoverTemplate
                   weekLabel={weekRangeLabel(["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"], week, TZ)}
-                  image="/stories/weekly-posts-carousel-cover.png"
+                  image="/stories/weekly-posts-carousel-cover.jpg"
                 />
               </StoryCanvas>
             </div>
