@@ -38,8 +38,13 @@ function newClass(day: Day): ClassItem {
   };
 }
 
-export function AdminScheduleEditor({ classes, onChange, onReset, syncState }: EditorProps) {
+export function AdminScheduleEditor({ classes, onChange, onReset }: EditorProps) {
   const [editing, setEditing] = useState<ClassItem | null>(null);
+  const [day, setDay] = useState<Day>(() => {
+    const today = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Makassar", weekday: "long" }).format(new Date()).toUpperCase() as Day;
+    return DAYS.includes(today) ? today : "MONDAY";
+  });
+  const dayClasses = classes.filter((item) => item.day === day).sort((a, b) => (a.start ?? 1e6) - (b.start ?? 1e6));
 
   const save = () => {
     if (!editing) return;
@@ -64,45 +69,56 @@ export function AdminScheduleEditor({ classes, onChange, onReset, syncState }: E
 
   return (
     <section className="admin-schedule" aria-labelledby="admin-schedule-title">
-      <div className="admin-schedule-head">
-        <div>
-          <p className="stories-panel-label">Admin only</p>
-          <h2 id="admin-schedule-title">Weekly schedule</h2>
-          <p>Make a cover change, edit a class, or add a one-off class. Saved changes update the shared schedule for everyone using the portal link; Momence is unchanged.</p>
-          <p className="stories-source-note" role="status">{syncState === "saving" ? "Saving shared schedule…" : syncState === "error" ? "Could not save the shared schedule. Your change was not published." : "Shared schedule is up to date."}</p>
-        </div>
-        <button className="admin-reset" type="button" onClick={onReset}>Restore Momence schedule</button>
-      </div>
-
-      <div className="admin-schedule-grid">
-        {DAYS.map((day) => {
-          const dayClasses = classes.filter((item) => item.day === day).sort((a, b) => (a.start ?? 1e6) - (b.start ?? 1e6));
+      <div className="chip-tabs" role="tablist">
+        {DAYS.map((d) => {
+          const count = classes.filter((item) => item.day === d).length;
           return (
-            <section className="admin-schedule-day" key={day}>
-              <header>
-                <h3>{titleCase(day)}</h3>
-                <span>{String(dayClasses.length).padStart(2, "0")}</span>
-              </header>
-              <div className="admin-schedule-list">
-                {dayClasses.map((item) => (
-                  <article className="admin-schedule-item" key={item.id} data-cover={item.needsCover}>
-                    <div className="admin-schedule-time">{item.timeLabel || "TBC"}</div>
-                    <div className="admin-schedule-copy">
-                      <div className="admin-schedule-name-row">
-                        <strong>{item.name}</strong>
-                        {item.tag && <b data-tag={item.tag}>{item.tag === "EVENT" ? "E" : "W"}</b>}
-                      </div>
-                      <span>{item.teachers.join(" · ") || "Teacher to confirm"}</span>
-                      <small>{item.space}{item.needsCover ? " · Cover needed" : ""}</small>
-                    </div>
-                    <button type="button" onClick={() => setEditing({ ...item })}>Edit</button>
-                  </article>
-                ))}
-              </div>
-              <button className="admin-add-class" type="button" onClick={() => setEditing(newClass(day))}>+ Add class</button>
-            </section>
+            <button key={d} type="button" role="tab" aria-selected={day === d} data-active={day === d} onClick={() => setDay(d)}>
+              {titleCase(d).slice(0, 3)}
+              <small className="sched-count">{count}</small>
+            </button>
           );
         })}
+      </div>
+
+      <div className="sched-list">
+        {dayClasses.length === 0 && <p className="sched-empty">No classes on {titleCase(day)}.</p>}
+        {dayClasses.map((item) => {
+          const [start, end] = (item.timeLabel || "TBC").split(" – ");
+          return (
+            <button type="button" className="sched-row" key={item.id} data-cover={item.needsCover} onClick={() => setEditing({ ...item })}>
+              <span className="sched-time">
+                {start}
+                {end && <small>{end}</small>}
+              </span>
+              <span className="sched-copy">
+                <strong>
+                  {item.name}
+                  {item.tag && <b>{item.tag === "EVENT" ? "E" : "W"}</b>}
+                </strong>
+                <small>
+                  <i data-space={item.space} aria-hidden="true" />
+                  {[item.teachers.join(", ") || "Teacher to confirm", titleCase(item.space)].join(" · ")}
+                  {item.needsCover && <em> · Cover needed</em>}
+                </small>
+              </span>
+              <span className="sched-chev" aria-hidden="true">›</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="sched-actions">
+        <button className="sched-add" type="button" onClick={() => setEditing(newClass(day))}>+ Add class</button>
+        <button
+          className="sched-reset"
+          type="button"
+          onClick={() => {
+            if (window.confirm("Restore this week from Momence? All manual edits for this week will be removed.")) onReset();
+          }}
+        >
+          Restore from Momence
+        </button>
       </div>
 
       {editing && (
