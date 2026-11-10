@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { type ClassItem, type Day, type SchedulePayload, type SharedStoryDesign } from "@/lib/types";
 import {
   classesForDay,
   datesForWeek,
   formatDateLabel,
   splitBySpace,
-  titleCase,
   weekRangeLabel,
 } from "@/lib/stories";
 import { StoryCanvas } from "./StoryCanvas";
@@ -22,6 +21,29 @@ import { CarouselDownloadButton } from "./CarouselDownloadButton";
 import { StoryLibrary } from "./StoryLibrary";
 
 const TZ = "Asia/Makassar";
+
+type TabId = "daily" | "weekly" | "carousel" | "schedule" | "library";
+
+const TABS: { id: TabId; label: string; icon: ReactNode }[] = [
+  { id: "daily", label: "Daily", icon: <><rect x="6" y="2" width="12" height="20" rx="2" /><path d="M9 7h6M9 11h6M9 15h4" /></> },
+  { id: "weekly", label: "Weekly", icon: <><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M3 9h18M8 2v4M16 2v4" /></> },
+  { id: "carousel", label: "Carousel", icon: <><rect x="7" y="4" width="10" height="16" rx="1.5" /><path d="M3 6v12M21 6v12" /></> },
+  { id: "schedule", label: "Schedule", icon: <path d="M4 6h16M4 12h16M4 18h10" /> },
+  { id: "library", label: "Library", icon: <><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></> },
+];
+
+function ChipTabs<T extends string>({ items, value, onChange }: { items: { id: T; label: string; badge?: number }[]; value: T; onChange: (id: T) => void }) {
+  return (
+    <div className="chip-tabs" role="tablist">
+      {items.map((item) => (
+        <button key={item.id} type="button" role="tab" aria-selected={value === item.id} data-active={value === item.id} onClick={() => onChange(item.id)}>
+          {item.label}
+          {item.badge ? <i>{item.badge}</i> : null}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export function StoriesClient({
   data,
@@ -38,11 +60,14 @@ export function StoriesClient({
   dailyDate: string;
   momenceAvailable: boolean;
 }) {
-  const [tab, setTab] = useState<"daily" | "weekly" | "carousel" | "schedule" | "library">("daily");
+  const [tab, setTab] = useState<TabId>("daily");
   const [adminClasses, setAdminClasses] = useState<ClassItem[]>(data.classes);
   const [syncState, setSyncState] = useState<"saved" | "saving" | "error">("saved");
   const [dailyEditing, setDailyEditing] = useState(false);
   const [weeklyCanvasEditing, setWeeklyCanvasEditing] = useState(false);
+  const [subView, setSubView] = useState<"posts" | "photos">("posts");
+  const [dailyView, setDailyView] = useState<"outdoor" | "indoor">("outdoor");
+  const [weeklyView, setWeeklyView] = useState<"events" | "outdoor" | "indoor" | "teachers" | "photos">("events");
   const [storyDesign, setStoryDesign] = useState<SharedStoryDesign>({});
 
   const week = useMemo(() => datesForWeek(TZ), []);
@@ -61,6 +86,10 @@ export function StoriesClient({
     [dailySource, dailyDay]
   );
   const dateLabel = formatDateLabel(new Date(dailyDate), TZ);
+  const tomorrowShort = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, weekday: "short", day: "numeric", month: "short" }).format(new Date(dailyDate));
+  const weekLabel = weekRangeLabel(["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"], week, TZ);
+  const tabContext =
+    tab === "daily" ? `Tomorrow · ${tomorrowShort}` : tab === "library" ? "Ready-made designs" : weekLabel;
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const designSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSharedClasses = useRef<ClassItem[]>(data.classes);
@@ -325,59 +354,97 @@ export function StoriesClient({
     }
   };
 
+  const photosDone = weeklyEvents.filter((event) => eventImages[event.id]).length;
+  const photosMissing = weeklyEvents.length - photosDone;
+
+  const subTabs = (
+    <ChipTabs
+      items={[
+        { id: "posts", label: "Posts" },
+        { id: "photos", label: "Event photos", badge: photosMissing },
+      ]}
+      value={subView}
+      onChange={setSubView}
+    />
+  );
+
+  const photosPanel = (
+    <section className="event-photos" aria-label="Event photos">
+      <p className="event-photos-summary">
+        <b>{photosDone} of {weeklyEvents.length}</b> events have a photo. Photos are shared by the carousel and the weekly story, and reused next week for events with the same name.
+      </p>
+      {weeklyEvents.length === 0 && <p className="stories-source-note">No workshops or events this week.</p>}
+      <ul className="event-photo-list">
+        {weeklyEvents.map((event) => {
+          const image = eventImages[event.id];
+          const day = event.day.charAt(0) + event.day.slice(1, 3).toLowerCase();
+          const time = event.timeLabel.split(" – ")[0];
+          return (
+            <li key={event.id}>
+              <label className="event-photo-card">
+                <span className="event-photo-thumb" style={image ? { backgroundImage: `url(${image})` } : undefined} aria-hidden="true">
+                  {image ? null : "+"}
+                </span>
+                <span className="event-photo-copy">
+                  <strong>{event.name}</strong>
+                  <small>{[day, time, event.teachers.join(", ")].filter(Boolean).join(" · ")}</small>
+                  <em data-ok={Boolean(image)}>{image ? "Photo set" : "Using default"}</em>
+                </span>
+                <span className="event-photo-action" data-primary={!image}>{image ? "Change" : "Upload"}</span>
+                <input
+                  className="event-photo-input"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.currentTarget.value = "";
+                    void uploadEventImage(event.id, file);
+                  }}
+                />
+              </label>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+
   return (
     <main className="stories-shell">
-      <header className="stories-head">
-        <p className="stories-eyebrow">The Path · Admin</p>
-        <h1 className="stories-title">Story Downloads</h1>
-        <div className="stories-head-actions">
-          <a className="stories-back" href="/">← Choose portal</a>
+      <header className="app-bar">
+        <div className="app-bar-title">
+          <p className="stories-eyebrow">The Path · Admin</p>
+          <h1>{TABS.find((item) => item.id === tab)?.label}</h1>
+          <small>{tabContext}</small>
+        </div>
+        <div className="app-bar-actions">
+          <span className="sync-pill" data-state={syncState} role="status" aria-live="polite">
+            <i aria-hidden="true" />
+            {syncState === "saving" ? "Saving…" : syncState === "error" ? "Not saved" : "Saved"}
+          </span>
+          <a className="stories-back" href="/">Portal</a>
           <AdminLogoutButton />
         </div>
       </header>
 
-      <div className="stories-tabs">
-        <button
-          type="button"
-          className="stories-tab"
-          data-active={tab === "daily"}
-          onClick={() => setTab("daily")}
-        >
-          Daily
-        </button>
-        <button
-          type="button"
-          className="stories-tab"
-          data-active={tab === "weekly"}
-          onClick={() => setTab("weekly")}
-        >
-          Weekly
-        </button>
-        <button
-          type="button"
-          className="stories-tab"
-          data-active={tab === "carousel"}
-          onClick={() => setTab("carousel")}
-        >
-          Weekly posts carousel
-        </button>
-        <button
-          type="button"
-          className="stories-tab"
-          data-active={tab === "schedule"}
-          onClick={() => setTab("schedule")}
-        >
-          Schedule editor
-        </button>
-        <button
-          type="button"
-          className="stories-tab"
-          data-active={tab === "library"}
-          onClick={() => setTab("library")}
-        >
-          Story library
-        </button>
-      </div>
+      <nav className="app-tabs" aria-label="Sections">
+        {TABS.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className="app-tab"
+            data-active={tab === item.id}
+            aria-current={tab === item.id ? "page" : undefined}
+            onClick={() => {
+              setTab(item.id);
+              window.scrollTo({ top: 0 });
+            }}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">{item.icon}</svg>
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </nav>
 
       {tab === "schedule" ? (
         <AdminScheduleEditor classes={adminClasses} onChange={applyChange} onReset={resetAdminClasses} syncState={syncState} />
@@ -385,24 +452,9 @@ export function StoriesClient({
         <StoryLibrary />
       ) : tab === "carousel" ? (
         <>
-          <section className="weekly-events-admin" aria-labelledby="carousel-admin-title">
-            <div>
-              <p className="stories-panel-label">Weekly Instagram posts</p>
-              <h2 id="carousel-admin-title">Workshops & events carousel</h2>
-              <p>Upload an image for each event. Every upload is shared across admins and used in the matching weekly story too.</p>
-            </div>
-            <div className="weekly-events-upload-list">
-              {weeklyEvents.map((event) => (
-                <label className="weekly-events-upload" key={`carousel-upload-${event.id}`}>
-                  <span>{event.tag === "EVENT" ? "E" : "W"}</span>
-                  <strong>{event.name}</strong>
-                  <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => uploadEventImage(event.id, e.target.files?.[0])} />
-                  <em>{eventImages[event.id] ? "Image linked to post" : "Upload image for post"}</em>
-                </label>
-              ))}
-            </div>
-          </section>
-          <div className="carousel-download-bar">
+          {subTabs}
+          {subView === "photos" && photosPanel}
+          <div className="carousel-download-bar" hidden={subView === "photos"}>
             <CarouselDownloadButton
               items={[
                 { canvasId: "weekly-carousel-cover", filename: "weekly-workshops-events-cover.png" },
@@ -413,7 +465,7 @@ export function StoriesClient({
               ]}
             />
           </div>
-          <div className="stories-grid">
+          <div className="stories-grid" hidden={subView === "photos"}>
             <div>
               <p className="stories-panel-label">Cover</p>
               <StoryCanvas filename="weekly-workshops-events-cover.png" label="Weekly posts carousel cover" width={1080} height={1350} canvasId="weekly-carousel-cover" hideActions>
@@ -435,8 +487,15 @@ export function StoriesClient({
         </>
       ) : tab === "daily" ? (
         <>
+          <ChipTabs
+            items={[
+              { id: "outdoor", label: "Outdoor Shala" },
+              { id: "indoor", label: "Indoor Shala" },
+            ]}
+            value={dailyView}
+            onChange={setDailyView}
+          />
           <div className="daily-edit-head">
-            <p className="stories-panel-label">Tomorrow · {titleCase(dailyDay)}</p>
             <button type="button" className="story-edit-link" onClick={() => setDailyEditing((editing) => !editing)}>{dailyEditing ? "Done editing" : "Edit in canvas"}</button>
           </div>
           {dailyEditing && <p className="stories-source-note" role="status">Click a class name, teacher, or time in the story, then click outside the text to save it for everyone.</p>}
@@ -447,8 +506,8 @@ export function StoriesClient({
             </p>
           )}
 
-          <div className="stories-grid">
-            <div>
+          <div className="stories-grid tabbed">
+            <div hidden={dailyView !== "outdoor"}>
               <p className="stories-panel-label">Outdoor Shala</p>
               <button type="button" className="story-edit-link" onClick={() => setTab("schedule")}>Edit schedule</button>
               <StoryCanvas filename={`tomorrow-${dailyDay.toLowerCase()}-outdoor-shala.png`} label="Outdoor Shala">
@@ -464,7 +523,7 @@ export function StoriesClient({
               </StoryCanvas>
             </div>
 
-            <div>
+            <div hidden={dailyView !== "indoor"}>
               <p className="stories-panel-label">Indoor Shala</p>
               <button type="button" className="story-edit-link" onClick={() => setTab("schedule")}>Edit schedule</button>
               <StoryCanvas filename={`tomorrow-${dailyDay.toLowerCase()}-indoor-shala.png`} label="Indoor Shala">
@@ -483,28 +542,25 @@ export function StoriesClient({
         </>
       ) : (
         <>
-          <section className="weekly-events-admin" aria-labelledby="weekly-events-admin-title">
-            <div>
-              <p className="stories-panel-label">New weekly story</p>
-              <h2 id="weekly-events-admin-title">Events & workshops</h2>
-              <p>Click <strong>Edit all canvases</strong> to edit every weekly poster. Text and image crops are shared across every device automatically.</p>
+          <ChipTabs
+            items={[
+              { id: "events", label: "Events" },
+              { id: "outdoor", label: "Outdoor" },
+              { id: "indoor", label: "Indoor" },
+              { id: "teachers", label: "Teachers" },
+              { id: "photos", label: "Photos", badge: photosMissing },
+            ]}
+            value={weeklyView}
+            onChange={setWeeklyView}
+          />
+          {weeklyView === "photos" ? photosPanel : (
+            <div className="sub-toolbar">
               <button type="button" className="story-edit-link" onClick={() => setWeeklyCanvasEditing((editing) => !editing)}>{weeklyCanvasEditing ? "Done editing" : "Edit all canvases"}</button>
-              {syncState !== "saved" && <p className="stories-source-note" role="status">{syncState === "saving" ? "Saving shared changes…" : "Could not save. Your last shared version was restored."}</p>}
             </div>
-            <div className="weekly-events-upload-list">
-              {weeklyEvents.map((event) => (
-                <label className="weekly-events-upload" key={event.id}>
-                  <span>{event.tag === "EVENT" ? "E" : "W"}</span>
-                  <strong>{event.name}</strong>
-                  <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => uploadEventImage(event.id, e.target.files?.[0])} />
-                  <em>{eventImages[event.id] ? "Image linked to carousel" : "Upload image"}</em>
-                </label>
-              ))}
-            </div>
-          </section>
+          )}
 
-          <div className="stories-grid">
-            <div>
+          <div className="stories-grid tabbed" hidden={weeklyView === "photos"}>
+            <div hidden={weeklyView !== "events"}>
               <p className="stories-panel-label">Events & workshops</p>
               <StoryCanvas filename="weekly-events-and-workshops.png" label="Events & workshops">
                 <WeeklyEventsTemplate
@@ -521,7 +577,7 @@ export function StoriesClient({
                 />
               </StoryCanvas>
             </div>
-            <div>
+            <div hidden={weeklyView !== "teachers"}>
             <p className="stories-panel-label">Teacher WhatsApp bulletin</p>
             <StoryCanvas filename="weekly-teacher-whatsapp-schedule.png" label="Teacher WhatsApp bulletin">
               <TeacherWeeklyTemplate classesByDay={classesByDay} week={week} editable={weeklyCanvasEditing} onClassChange={updateWeeklyClass} title={storyDesign.teacherTitle} onTitleChange={(teacherTitle) => updateStoryDesign({ teacherTitle })} />
@@ -531,7 +587,7 @@ export function StoriesClient({
             { shala: "outdoor", label: "Outdoor Shala", filename: "weekly-outdoor-shala.png" },
             { shala: "indoor", label: "Indoor Shala", filename: "weekly-indoor-shala.png" },
           ] as const).map(({ shala, label, filename }) => (
-            <div key={shala}>
+            <div key={shala} hidden={weeklyView !== shala}>
               <p className="stories-panel-label">{label}</p>
               <StoryCanvas filename={filename} label={label}>
                 <WeeklyStoryTemplate
