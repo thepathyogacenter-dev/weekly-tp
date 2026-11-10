@@ -25,11 +25,15 @@ const TZ = "Asia/Makassar";
 
 export function StoriesClient({
   data,
+  dailyClasses,
+  dailyWeekKey,
   dailyDay,
   dailyDate,
   momenceAvailable,
 }: {
   data: SchedulePayload;
+  dailyClasses: ClassItem[];
+  dailyWeekKey: string;
   dailyDay: Day;
   dailyDate: string;
   momenceAvailable: boolean;
@@ -42,14 +46,21 @@ export function StoriesClient({
   const [storyDesign, setStoryDesign] = useState<SharedStoryDesign>({});
 
   const week = useMemo(() => datesForWeek(TZ), []);
-  // Semua post Instagram (termasuk Daily) ambil dari Schedule Editor (adminClasses),
-  // yang berbasis Momence + override manual. Daily = kelas hari besok.
+  const weekKey = week.MONDAY.toISOString().slice(0, 10);
+
+  // Senin–Kamis & Minggu: Daily ikut Schedule Editor (adminClasses), sama seperti sebelumnya.
+  // Jumat & Sabtu: editor sudah di minggu depan, Daily butuh minggu ini, jadi pakai state terpisah.
+  const dailySeparate = dailyWeekKey !== weekKey;
+  const [dailyOnly, setDailyOnly] = useState<ClassItem[]>(dailyClasses);
+  const lastDailyShared = useRef<ClassItem[]>(dailyClasses);
+  const dailySaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dailySource = dailySeparate ? dailyOnly : adminClasses;
+
   const { outdoor, indoor } = useMemo(
-    () => splitBySpace(classesForDay(adminClasses, dailyDay)),
-    [adminClasses, dailyDay]
+    () => splitBySpace(classesForDay(dailySource, dailyDay)),
+    [dailySource, dailyDay]
   );
   const dateLabel = formatDateLabel(new Date(dailyDate), TZ);
-  const weekKey = week.MONDAY.toISOString().slice(0, 10);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const designSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSharedClasses = useRef<ClassItem[]>(data.classes);
@@ -126,23 +137,61 @@ export function StoriesClient({
   };
 
   const updateDailyClass = (id: string, patch: { name?: string; teachers?: string[]; timeLabel?: string }) => {
-    applyChange(adminClasses.map((classItem) => classItem.id === id ? { ...classItem, ...patch } : classItem));
+    const patchList = (list: ClassItem[]) =>
+      list.map((classItem) => (classItem.id === id ? { ...classItem, ...patch } : classItem));
+
+    // Daily di minggu yang sama dengan editor: simpan lewat jalur biasa.
+    if (!dailySeparate) {
+      applyChange(patchList(adminClasses));
+      return;
+    }
+
+    // Jumat & Sabtu: simpan ke minggu Daily, bukan minggu editor.
+    const next = patchList(dailyOnly);
+    setDailyOnly(next);
+    setSyncState("saving");
+    if (dailySaveTimer.current) clearTimeout(dailySaveTimer.current);
+    dailySaveTimer.current = setTimeout(async () => {
+      try {
+        const response = await fetch("/api/admin/schedule", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ week: dailyWeekKey, classes: next }),
+        });
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result?.ok) throw new Error("Daily save failed");
+        lastDailyShared.current = next;
+        setSyncState("saved");
+      } catch {
+        setDailyOnly(lastDailyShared.current);
+        setSyncState("error");
+      }
+    }, 600);
   };
 
   // Keep already-open admin pages aligned with shared edits from another device.
   useEffect(() => {
     let active = true;
     const refreshSharedCanvas = async () => {
-      if (savingRef.current) return;
+      // Tab tersembunyi atau sedang menyimpan: jangan poll.
+      if (savingRef.current || document.hidden) return;
       try {
         const response = await fetch(`/api/admin/schedule?week=${weekKey}`, { cache: "no-store" });
         const result = await response.json();
         if (!active) return;
-        if (Array.isArray(result?.classes)) {
+        // Update state hanya kalau datanya benar-benar berubah.
+        if (
+          Array.isArray(result?.classes) &&
+          JSON.stringify(result.classes) !== JSON.stringify(lastSharedClasses.current)
+        ) {
           lastSharedClasses.current = result.classes;
           setAdminClasses(result.classes);
         }
-        if (result?.design && typeof result.design === "object") {
+        if (
+          result?.design &&
+          typeof result.design === "object" &&
+          JSON.stringify(result.design) !== JSON.stringify(lastSharedDesign.current)
+        ) {
           storyDesignRef.current = result.design;
           lastSharedDesign.current = result.design;
           setStoryDesign(result.design);
@@ -151,23 +200,34 @@ export function StoriesClient({
         // Retain the last confirmed shared version while offline.
       }
     };
+    const onVisible = () => {
+      if (!document.hidden) void refreshSharedCanvas();
+    };
     void refreshSharedCanvas();
     const timer = window.setInterval(refreshSharedCanvas, 10_000);
-    return () => { active = false; window.clearInterval(timer); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [weekKey]);
 
+  // Gambar event hanya di-fetch ulang kalau daftar event berubah, bukan tiap poll.
+  const eventIdsKey = JSON.stringify(weeklyEvents.map((event) => [event.id, event.name]));
   useEffect(() => {
     let active = true;
-    Promise.all(weeklyEvents.map(async (event) => {
-      const response = await fetch(`/api/admin/story-image?week=${weekKey}&event=${encodeURIComponent(event.id)}`, { cache: "no-store" });
+    const pairs: [string, string][] = JSON.parse(eventIdsKey);
+    Promise.all(pairs.map(async ([id, name]) => {
+      const response = await fetch(`/api/admin/story-image?week=${weekKey}&event=${encodeURIComponent(id)}&name=${encodeURIComponent(name)}`, { cache: "no-store" });
       const result = response.ok ? await response.json() : null;
-      return [event.id, result?.image] as const;
+      return [id, result?.image] as const;
     })).then((items) => {
       if (!active) return;
       setEventImages(Object.fromEntries(items.filter(([, image]) => typeof image === "string")));
     }).catch(() => undefined);
     return () => { active = false; };
-  }, [weekKey, weeklyEvents]);
+  }, [weekKey, eventIdsKey]);
 
 
   const updateStoryDesign = (patch: Partial<SharedStoryDesign>) => {
@@ -247,7 +307,12 @@ export function StoriesClient({
       const response = await fetch("/api/admin/story-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ week: weekKey, event: eventId, image }),
+        body: JSON.stringify({
+          week: weekKey,
+          event: eventId,
+          name: weeklyEvents.find((event) => event.id === eventId)?.name ?? "",
+          image,
+        }),
       });
       const result = await response.json().catch(() => null);
       if (!response.ok || !result?.ok) throw new Error("Shared image save failed");

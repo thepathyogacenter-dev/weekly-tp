@@ -18,8 +18,9 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const week = url.searchParams.get("week") ?? "";
   const event = url.searchParams.get("event") ?? "";
+  const name = (url.searchParams.get("name") ?? "").slice(0, 200);
   if (!WEEK_RE.test(week) || !event || event.length > 200) return NextResponse.json({ error: "Invalid request." }, { status: 400, headers: NO_STORE });
-  const image = await readStoryImage(week, event);
+  const image = await readStoryImage(week, event, name);
   return NextResponse.json({ image }, { headers: NO_STORE });
 }
 
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
   if (!WEEK_RE.test(week) || !event || event.length > 200 || !/^data:image\/(png|jpeg|webp);base64,/.test(image) || image.length > 650_000) {
     return NextResponse.json({ error: "Use a PNG, JPG, or WebP image below 500 KB." }, { status: 400, headers: NO_STORE });
   }
-  const ok = await writeStoryImage(week, event, image);
+  const name = typeof body?.name === "string" ? body.name.slice(0, 200) : "";
+  const ok = await writeStoryImage(week, event, image, name);
   return NextResponse.json({ ok }, { status: ok ? 200 : 503, headers: NO_STORE });
 }
